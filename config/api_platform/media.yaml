@@ -1,0 +1,129 @@
+##################################
+App\Entity\MediaOwner:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'MediaOwner:Update'
+
+    normalization_context:
+      groups:
+        - 'MediaOwner:Read'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\UserMedia:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Media'
+
+    normalization_context:
+      groups:
+        - 'Blame'
+        - 'Timestamp'
+        - 'Media'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    postfile:
+      controller: App\Controller\CreateUserMediaAction
+      deserialize: false
+      method: POST
+      openapi_context:
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                properties:
+                  file:
+                    format: binary
+                    type: string
+                type: object
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    getcontent:
+      controller: App\Controller\GetUserMediaContentAction
+      method: GET
+      path: '/user_media/{id}/content'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\TplMedia:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Media'
+
+    normalization_context:
+      groups:
+        - 'Media'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    postfile:
+      controller: App\Controller\CreateTplMediaAction
+      deserialize: false
+      method: POST
+      openapi_context:
+        requestBody:
+          content:
+            multipart/form-data:
+              schema:
+                properties:
+                  file:
+                    format: binary
+                    type: string
+                type: object
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'

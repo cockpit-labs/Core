@@ -1,0 +1,451 @@
+[
+  {
+    "Calendar": [
+      {
+        "id": "calendar",
+        "start": "date:-6 weeks",
+        "end": "date:+2 months",
+        "cronStart": "* * * * 1",
+        "cronEnd": "* * * * 5",
+        "label": "Calendar",
+        "description": "Calendar for year 2020, with period = between monday and friday"
+      }
+    ]
+  },
+  {
+    "TplBlock": [
+      {
+        "id": "block1",
+        "tplQuestions": [
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 3,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "yes"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "no"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "lighting is complete and correct",
+            "description": null
+          },
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 2,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "yes"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "n/a"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "no"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "storehouse is clean and locked ",
+            "description": null
+          },
+          {
+            "alias": "range",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "range",
+              "min": 1,
+              "max": 10,
+              "step": 1
+            },
+            "validator": {
+            },
+            "position": 3,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                  "expression": "$value"
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "windows are compliant with merchandizing guide ",
+            "description": null
+          },
+          {
+            "alias": "select",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "list",
+              "multiselect": false
+            },
+            "validator": {
+            },
+            "position": 4,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 1,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "All clean"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "Need some improvement"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "not acceptable"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "shelves are clean ",
+            "description": null
+          }
+        ],
+        "resource": "TplBlock",
+        "label": "STORE EVALUATION",
+        "description": "description STORE EVALUATION "
+      },
+      {
+        "id": "block2",
+        "tplQuestions": [
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 3,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "ok"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "ko"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "merchandising is up-to-date ",
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "position": 2,
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 0,
+                "category": null,
+                "choices": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "resource": "QuestionChoice",
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "resource": "QuestionChoice",
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": 1
+                },
+                "resource": "TplQuestion",
+                "label": "storehouse is clean and locked ",
+                "description": null
+              }]
+          },
+          {
+            "alias": "select",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "list",
+              "multiselect": true
+            },
+            "validator": {
+            },
+            "position": 2,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 1,
+            "maxChoices": 3,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "learning module 1"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "learning module 2"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "learning module 3"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "the team is trained",
+            "description": null
+          },
+          {
+            "alias": "none",
+            "weight": 0,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "none"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 0,
+            "hasComment": false,
+            "maxPhotos": 3,
+            "category": null,
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "take picture of merch implementation ",
+            "description": null
+          }
+        ],
+        "resource": "TplBlock",
+        "label": "MERCHANDISING EVALUATION ",
+        "description": "description MERCHANDISING EVALUATION"
+      }
+    ]
+  },
+  {
+    "TplQuestionnaire": [
+      {
+        "id": "TplQuestionnaire1",
+        "resource": "TplQuestionnaire",
+        "label": "Store Questionnaire",
+        "description": "description Store Questionnaire"
+      }
+    ]
+  },
+  {
+    "TplQuestionnaireBlock": [
+      {
+        "position": 0,
+        "tplQuestionnaire": "localid:TplQuestionnaire1",
+        "tplBlock": "localid:block1"
+      },
+      {
+        "position": 1,
+        "tplQuestionnaire": "localid:TplQuestionnaire1",
+        "tplBlock": "localid:block2"
+      }
+    ]
+  },
+  {
+    "TplFolder": [
+      {
+        "id": "TemplateFolder1",
+        "folderTargets": [
+          {
+            "role": "CCEStore",
+            "resource": "TplFolderTarget"
+          }
+        ],
+        "permissions": [
+          {
+            "right": "CREATE",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "SUBMIT",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "STATS",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          }
+        ],
+        "tplQuestionnaires": [
+          "localid:TplQuestionnaire1"
+        ],
+        "calendars": [
+          "localid:calendar"
+        ],
+        "minFolders": 1,
+        "maxFolders": 1,
+        "label": "Store visit",
+        "description": "Description of folder store visit",
+        "state": "SUBMITTED"
+      }
+    ]
+  }
+]

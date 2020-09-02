@@ -1,0 +1,8 @@
+easy_admin:
+  site_name: 'Cockpit Community edition: Easy Admin module.'
+  design:
+    assets:
+      css:
+        - '/bundles/app/stylesheets/demo.css'
+  formats:
+    datetime: 'd/m/Y h:i A e'

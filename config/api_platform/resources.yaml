@@ -1,0 +1,382 @@
+##################################
+App\Entity\Block:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Block:Update'
+
+    normalization_context:
+      groups:
+        - 'Block:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    getstat:
+      method: GET
+      path: /blocks/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+        skip_null_values: false
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    getstat:
+      method: GET
+      path: /blocks/{id}/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+    patch:
+      denormalization_context:
+        groups:
+          - 'Block:Update'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Calendar:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Calendar:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'Calendar:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Category:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Category:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'Category:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Folder:
+  attributes:
+    input: App\Entity\Folder
+
+    normalization_context:
+      groups:
+        - 'Folder:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+        - 'State'
+        - 'Blame'
+        - 'Timestamp'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    getdraft:
+      method: GET
+      path: /draftfolders
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    stats:
+      method: GET
+      path: /folders/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Blame'
+          - 'Timestamp'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+        skip_null_values: false
+    create:
+      method: POST
+      denormalization_context:
+        groups:
+          - 'Folder:Create'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    getstats:
+      method: GET
+      path: /folders/{id}/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Blame'
+          - 'Timestamp'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+    update:
+      method: PATCH
+      denormalization_context:
+        groups:
+          - 'Folder:Update'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    submit:
+      method: PATCH
+      path: /folders/{id}/submit
+      denormalization_context:
+        groups:
+          - 'none'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\QuestionAnswer:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'QuestionAnswer:Update'
+
+    normalization_context:
+      groups:
+        - 'QuestionAnswer:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\AnswerValue:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'AnswerValue:Update'
+
+    normalization_context:
+      groups:
+        - 'AnswerValue:Read'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\QuestionChoice:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'QuestionChoice:Update'
+
+    normalization_context:
+      groups:
+        - 'QuestionChoice:Read'
+        - 'Resource'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Questionnaire:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Questionnaire:Update'
+        - 'Score'
+
+    normalization_context:
+      groups:
+        - 'Blame'
+        - 'Timestamp'
+        - 'Questionnaire:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    getstat:
+      method: GET
+      path: /questionnaires/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Blame'
+          - 'Timestamp'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+        skip_null_values: false
+  #    post:
+  #      security: is_granted('ROLE_CCEUser')
+  #      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    getstat:
+      method: GET
+      path: /questionnaires/{id}/stats
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'Blame'
+          - 'Timestamp'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'Score'
+    patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'

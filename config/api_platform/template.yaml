@@ -1,0 +1,348 @@
+##################################
+App\Entity\TplBlock:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplBlock:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'TplBlock:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\TplFolder:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplFolder:Update'
+        - 'Label'
+        - 'Description'
+        - 'State'
+
+    output: App\Entity\TplFolder
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'TplFolder:Read'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+        preserve_empty_objects: true
+        skip_null_values: false
+#      openapi_context:
+#        parameters:
+#          - name: all
+#            in: query
+#            description: 'all templates, even out of period'
+#            required: false
+#            schema:
+#              type: bool
+#              default: false
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+    getexpectation:
+      method: GET
+      path: /tpl_folders/expectation
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get folders submission expectation'
+        parameters:
+          - name: fromdate
+            in: query
+            description: 'beginning of date interval'
+            required: false
+            schema:
+              type: string
+          - name: todate
+            in: query
+            description: 'end of date interval'
+            required: false
+            schema:
+              type: string
+
+    all:
+      method: GET
+      path: /tpl_folders/all
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get all templates, even out of period'
+
+    periods:
+      method: GET
+      path: /tpl_folders/periods
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get folders periods'
+        parameters:
+          - name: fromdate
+            in: query
+            description: 'beginning of date interval'
+            required: false
+            type: string
+          - name: todate
+            in: query
+            description: 'end of date interval'
+            required: false
+            type: string
+
+      normalization_context:
+        groups:
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'TplFolder:Periods'
+        skip_null_values: false
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      normalization_context:
+        groups:
+          - 'TplFolder:Read'
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+        preserve_empty_objects: true
+        skip_null_values: false
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    getexpectation:
+      method: GET
+      path: /tpl_folders/{id}/expectation
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get folders submission expectation'
+        parameters:
+          - name: fromdate
+            in: query
+            description: 'beginning of date interval'
+            required: false
+            type: string
+          - name: todate
+            in: query
+            description: 'end of date interval'
+            required: false
+            type: string
+      normalization_context:
+        groups:
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'TplFolder:Expectation'
+    periods:
+      method: GET
+      path: /tpl_folders/{id}/periods
+      security: is_granted('ROLE_CCEDashboard')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get folder periods'
+        parameters:
+          - name: fromdate
+            in: query
+            description: 'beginning of date interval'
+            required: false
+            type: string
+          - name: todate
+            in: query
+            description: 'end of date interval'
+            required: false
+            type: string
+      normalization_context:
+        groups:
+          - 'Resource'
+          - 'Label'
+          - 'Description'
+          - 'TplFolder:Periods'
+
+##################################
+App\Entity\TplFolderPermission:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplFolderPermission:Update'
+
+    normalization_context:
+      groups:
+        - 'TplFolderPermission:Read'
+        - 'Resource'
+      preserve_empty_objects: true
+      skip_null_values: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+
+
+##################################
+App\Entity\TplQuestion:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplQuestion:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'TplQuestion:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+        - 'Score'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\TplQuestionnaire:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplQuestionnaire:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'TplQuestionnaire:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+        - 'Score'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      output: App\Entity\TplQuestionnaire
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      output: App\Entity\TplQuestionnaire
+    update:
+      method: PATCH
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      input: App\Entity\TplQuestionnaire
+
+##################################
+App\Entity\TplQuestionnaireBlock:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'TplQuestionnaireBlock:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'TplQuestionnaireBlock:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'

@@ -1,0 +1,14 @@
+easy_admin:
+  design:
+    menu:
+      - label: 'menu.folder'
+        icon: 'shopping-basket'
+        children:
+          - {entity: 'TemplateFolder', icon: 'th-list', label: 'menu.folder', params: {sortField: 'createdAt'}, default: true}
+          - {entity: 'TemplateQuestionnaire', icon: 'th-list', label: 'menu.questionnaires', params: {sortField: 'createdAt'}, default: true}
+          - {entity: 'TemplateBlock', icon: 'plus-circle', label: 'menu.blocks', params: {sortField: 'createdAt'}}
+          - {entity: 'TemplateQuestion', icon: 'tags', label: 'menu.questions'}
+      - {entity: 'Category', icon: 'tags', label: 'menu.category'}
+      - {entity: 'Calendar', icon: 'tags', label: 'menu.calendar'}
+
+      - {label: 'menu.about'}

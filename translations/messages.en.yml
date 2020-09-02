@@ -1,0 +1,71 @@
+# There are two main techniques to fully translate a backend:
+# 1) Define the `label` option for each element and translate those labels in
+#    files like this.
+# 2) Let the backend create the labels for each element and translate those
+#    labels in files like this.
+#
+# The first one is the traditional way of translating Symfony applications, but
+# is very boring and you'll make lots of mistakes. The second one is the way we
+# recommend to translate backends.
+#
+# Both ways are explained in
+#  https://github.com/javiereguiluz/EasyAdminBundle/blob/master/Resources/doc/tutorials/i18n.md
+
+# NOTE: since the application is originally developed in English, this
+#       "translation" file looks useless because it doesn't really translate
+#       any content. However, this file is essential to use it as the base for
+#       the translations into other languages.
+
+# The "main menu" is an example of defining the labels explicitly
+# (they are translated following the 1) method)
+# ------------------------------------------------------------------------------
+menu.category:     Categories
+menu.calendar:     Calendars
+menu.folder:      Folders
+menu.folder.list: List Folders
+menu.folder.add:  Add Folder
+menu.questionnaires:     Questionnaires
+menu.questions:     Questions
+menu.blocks:     Blocks
+menu.about:        About
+
+# We let EasyAdmin generate the rest of the backend labels
+# (they are translated following the 2) method)
+# ------------------------------------------------------------------------------
+
+# entity names, labels and titles
+Categories: Categories
+Category: Category
+Questionnaires: Questionnaires
+Folder: Folder
+Folders: Folders
+Question: Question
+Calendar: Calendar
+Calendars: Calendars
+
+# entity properties
+Created at: Created at
+Delivery date: Delivery date
+Delivery hour: Delivery hour
+Description: Description
+Email: Email
+Enabled: Enabled
+Features: Features
+Guid: GUID
+ID: ID
+Image file: Image file
+Image: Image
+Is active: Is active
+Label: Label
+Name: Name
+Block: Block
+Blocks: Blocks
+Total: Total
+
+# help messages
+Reserved for administrators use: Reserved for administrators use
+
+# messages that contain variables
+'Folder %entity_label%': 'Folder %entity_label%'
+
+# Service. messages

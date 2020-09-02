@@ -1,0 +1,39 @@
+framework:
+  secret: '%env(APP_SECRET)%'
+  #csrf_protection: true
+  #http_method_override: true
+
+  # Enables session support. Note that the session will ONLY be started if you read or write from it.
+  # Remove or comment this section to explicitly disable session support.
+  session:
+    handler_id: null
+    cookie_secure: auto
+    cookie_samesite: lax
+
+  #esi: true
+  #fragments: true
+  php_errors:
+    log: true
+
+  workflows:
+    folders:
+      type: 'state_machine' #  'state_machine' or 'workflow'
+      audit_trail:
+        enabled: true
+      marking_store:
+        type: 'method'
+        property: 'state'
+      supports:
+        - App\Entity\Folder
+      initial_marking: draft
+      places:
+        - draft
+        - submitted
+        - validated
+      transitions:
+        submit:
+          from: draft
+          to:   submitted
+        validate:
+          from: submitted
+          to:   validated

@@ -1,0 +1,18 @@
+easy_admin:
+  entities:
+    TemplateFolder:
+      class: App\Entity\TplFolder
+      label: Folders
+      list:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+      form:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+          - {property: 'tplQuestionnaires', label: 'Questionnaires', type_options: {by_reference: false}}
+          - {property: 'calendars', 'label': 'Calendars', type_options: {by_reference: false}}
+
+#    QuestionChoice:
+#        class: App\Entity\QuestionChoice

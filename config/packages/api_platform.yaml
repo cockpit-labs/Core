@@ -1,0 +1,42 @@
+api_platform:
+  title: 'API Cockpit CE'
+  description: 'API for Cockpit Community Edition'
+  version: 0.8.0
+  show_webby: false
+  # Enable ReDoc.
+  enable_re_doc: true
+
+  # Enable the Swagger documentation and export.
+  enable_swagger: true
+
+  # Enable Swagger ui.
+  enable_swagger_ui: true
+
+  # Allow using plain IDs for JSON format
+  allow_plain_identifiers: true
+
+  mapping:
+    paths:
+      - '%kernel.project_dir%/config/api_platform' # yaml or xml directory configuration
+      - '%kernel.project_dir%/src/Entity'
+  patch_formats:
+    json: ['application/merge-patch+json']
+  swagger:
+    versions: [3]
+    api_keys:
+      apiKey:
+        name: Authorization
+        type: header
+  eager_loading:
+    enabled: true
+    force_eager: false
+    max_joins: 10
+  formats:
+    json:     ['application/json']
+    jsonld:   ['application/ld+json']
+    jsonhal:  ['application/hal+json']
+    jsonapi:  ['application/vnd.api+json']
+    xml:      ['application/xml', 'text/xml']
+    yaml:     ['application/x-yaml']
+    csv:      ['text/csv']
+    html:     ['text/html']

@@ -1,0 +1,39 @@
+parameters:
+  CCE_viewclient: 'cockpitview'     # KeyCloak client id for view module
+  CCE_adminclient: 'cockpitadmin'   # KeyCloak client id for admin module
+  CCE_coreclient: 'cockpitcore'     # KeyCloak client id for core module
+  CCE_KEYCLOAKURL: '%env(resolve:KEYCLOAKURL)%'
+  CCE_KEYCLOAKSECRET: '%env(resolve:JWT_PASSPHRASEFILE)%'
+  CCE_KEYCLOAKAUTHURL: '%env(resolve:KEYCLOAKAUTHURL)%'
+  CCE_KEYCLOAKREALM: '%env(KEYCLOAKREALM)%'
+  CCE_KEYCLOAKCONTAINER: '%env(KEYCLOAK_CONTAINER)%'
+  CCE_APIURL: '%env(APIURL)%'
+  CCE_APISERVER: '%env(APISERVER)%'
+  CCE_DEFAULTURL: '%env(DEFAULTURL)%'
+  JWT_SECRET_KEY: '%env(resolve:JWT_SECRET_KEY)%'
+  JWT_PUBLIC_KEY: '%env(resolve:JWT_PUBLIC_KEY)%'
+  JWT_PASSPHRASEFILE: '%env(resolve:JWT_PASSPHRASEFILE)%'
+  JWT_PASSPHRASE: '%env(resolve:JWT_PASSPHRASE)%'
+
+services:
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/*'
+    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,DataFixtures,CentralAdmin}'
+
+  App\Controller\:
+    resource: '../src/Controller'
+    tags: ['controller.service_arguments']
+
+
+  CronExpressionGenerator\FakerProvider:
+    tags: [ { name: nelmio_alice.faker.provider } ]
+
+
+  #  manualy add flysystem interface since OneupFlysystemBundle doesn't correctly configure it's services to use Symfoyny's autowiring correctly
+  League\Flysystem\FilesystemInterface: "@oneup_flysystem.mediafs_filesystem"

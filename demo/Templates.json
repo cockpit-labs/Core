@@ -1,0 +1,486 @@
+[
+  {
+    "Category": [
+      {
+        "label": "A sample Category",
+        "description": "A sample category, just like that"
+      },
+      {
+        "label": "Another sample Category",
+        "description": "Another sample category, just like this"
+      }
+    ]
+  },
+  {
+    "Calendar": [
+      {
+        "id": "calendar-odd",
+        "start": "date:-6 weeks",
+        "end": "date:+2 months",
+        "cronStart": "* * 1-31/2 * *",
+        "cronEnd": "* * 1-31/2 * *",
+        "label": "OddCalendar",
+        "description": "Calendar for year 2020, with period = odd days"
+      },
+      {
+        "id": "calendar-even",
+        "start": "date:-6 weeks",
+        "end": "date:+2 months",
+        "cronStart": "* * */2 * *",
+        "cronEnd": "* * */2 * *",
+        "label": "string",
+        "description": "Calendar for year 2020, with period = even days"
+      }
+    ]
+  },
+  {
+    "TplBlock": [
+      {
+        "id": "block1",
+        "tplQuestions": [
+          {
+            "alias": "none",
+            "weight": 0,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "none"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 0,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question sans réponse ni commentaire ni photo.",
+            "description": null
+          },
+          {
+            "alias": "text",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "text"
+            },
+            "validator": {
+            },
+            "position": 2,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                ",document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question texte avec commentaire sans photo.",
+            "description": null
+          },
+          {
+            "alias": "select",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "list",
+              "multiselect": true
+            },
+            "validator": {
+            },
+            "position": 3,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 1,
+            "maxChoices": 2,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "Choix 1"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "Choix 2"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "Choix 3"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question select non-obligatoire mais avec au minimum 1 réponse, max 2.",
+            "description": null
+          },
+          {
+            "alias": "yesno",
+            "weight": 55,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 4,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 3,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "yes"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": "no"
+              }
+            ],
+            "defaultChoice": null,
+            "children": [
+              {
+                "alias": "text",
+                "weight": 80,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "text"
+                },
+                "position": 1,
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 1,
+                "category": null,
+                "choices": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "resource": "QuestionChoice",
+                    "locale": null,
+                    "label": ""
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": null,
+                "resource": "TplQuestion",
+                "label": "ceci est ma question texte liée avec max 1 photo.",
+                "description": null
+              }
+            ],
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question oui / non.",
+            "description": null
+          },
+          {
+            "alias": "number",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "number",
+              "min": 0,
+              "max": 99,
+              "step": 2
+            },
+            "validator": {
+            },
+            "position": 5,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                  "expression": "$value*1000"
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question nombre entre 0 et 99 avec un pas de 2",
+            "description": null
+          },
+          {
+            "alias": "range",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "range",
+              "min": -10,
+              "max": 10,
+              "step": 0.5
+            },
+            "validator": {
+            },
+            "position": 6,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                  "expression": "$value*1000"
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question slider entre -10 et 10 avec un pas de 0,5",
+            "description": null
+          },
+          {
+            "alias": "dateTime",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "dateTime",
+              "date": true,
+              "time": true
+            },
+            "validator": {
+            },
+            "position": 7,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choices": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "resource": "QuestionChoice",
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "resource": "TplQuestion",
+            "label": "ceci est ma question date avec jour et heure/minutes",
+            "description": null
+          }
+        ],
+        "resource": "TplBlock",
+        "label": "Bloc numéro un",
+        "description": "Ceci est la description du bloc numéro un."
+      },
+      {
+        "id": "block2",
+        "resource": "TplBlock",
+        "label": "Bloc numéro deux",
+        "description": "Ceci est la description du bloc numéro deux."
+      }
+    ]
+  },
+  {
+    "TplQuestionnaire": [
+      {
+        "id": "TplQuestionnaire1",
+        "resource": "TplQuestionnaire",
+        "label": "Questionnaire numéro un",
+        "description": "Ceci est la description du questionnaire numéro un."
+      },
+      {
+        "id": "TplQuestionnaire2",
+        "tplQuestionnaireBlocks": [
+          {
+            "position": 1,
+            "tplBlock": "localid:block2"
+          }
+        ],
+        "resource": "TplQuestionnaire",
+        "label": "Questionnaire numéro deux",
+        "description": "Ceci est la description du questionnaire numéro deux."
+      }
+    ]
+  },
+  {
+    "TplQuestionnaireBlock": [
+      {
+        "position": 0,
+        "tplQuestionnaire": "localid:TplQuestionnaire1",
+        "tplBlock": "localid:block1"
+      },
+      {
+        "position": 1,
+        "tplQuestionnaire": "localid:TplQuestionnaire1",
+        "tplBlock": "localid:block2"
+      },
+      {
+        "position": 0,
+        "tplQuestionnaire": "localid:TplQuestionnaire2",
+        "tplBlock": "localid:block2"
+      }
+    ]
+  },
+  {
+    "TplFolder": [
+      {
+        "id": "TemplateFolder1",
+        "folderTargets": [
+          {
+            "role": "CCEStore",
+            "resource": "TplFolderTarget"
+          }
+        ],
+        "permissions": [
+          {
+            "right": "CREATE",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "SUBMIT",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "STATS",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          }
+        ],
+        "tplQuestionnaires": [
+          "localid:TplQuestionnaire1",
+          "localid:TplQuestionnaire2"
+        ],
+        "calendars": [
+          "localid:calendar-odd"
+        ],
+        "minFolders": 1,
+        "maxFolders": 1,
+        "label": "Dossier numéro un",
+        "description": "Ceci est la description du dossier n°1",
+        "state": "SUBMITTED"
+      },
+      {
+        "id": "TemplateFolder2",
+        "folderTargets": [
+          {
+            "role": "CCEStore",
+            "resource": "TplFolderTarget"
+          }
+        ],
+        "permissions": [
+          {
+            "right": "CREATE",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "SUBMIT",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCEStoreManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          },
+          {
+            "right": "STATS",
+            "role": "CCECountryManager",
+            "resource": "FolderPermission"
+          }
+        ],
+        "tplQuestionnaires": [
+          "localid:TplQuestionnaire1",
+          "localid:TplQuestionnaire2"
+        ],
+        "calendars": [
+          "localid:calendar-even"
+        ],
+        "minFolders": 1,
+        "maxFolders": 2,
+        "label": "Dossier numéro deux",
+        "description": "Ceci est la description du dossier n°1",
+        "state": "SUBMITTED"
+      }
+    ]
+  }
+]

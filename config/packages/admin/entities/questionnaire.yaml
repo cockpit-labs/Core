@@ -1,0 +1,15 @@
+easy_admin:
+  entities:
+    TemplateQuestionnaire:
+      class: App\Entity\TplQuestionnaire
+      label: Questionnaires
+      list:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+          - {property: 'tplBlockPositions', label: 'Blocks'}
+      form:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+          - {property: 'tplBlockPositions', label: 'Blocks'}

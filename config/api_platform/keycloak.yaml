@@ -1,0 +1,74 @@
+##################################
+App\Entity\Role:
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    get:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+  normalizationContext:
+    groups:
+      - 'Role:Read'
+      - 'Resource'
+    preserve_empty_objects: true
+
+##################################
+App\Entity\Target:
+  attributes:
+
+    normalization_context:
+      groups:
+        - 'Target:Read'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        parameters:
+          - name: right
+            in: query
+            description: 'user right'
+            required: false
+            schema:
+              type: string
+
+  itemOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+#App\Entity\Group:
+#  attributes:
+#
+#    normalization_context:
+#      groups:
+#        - 'Target:Read'
+#        - 'Resource'
+#      preserve_empty_objects: true
+#
+#  collectionOperations:
+#    get:
+#      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+#      security_message: 'Sorry, but you are not authorized.'
+#      openapi_context:
+#        parameters:
+#          - name: membership
+#            in: query
+#            description: 'membership direction (up/down)'
+#            required: false
+#            schema:
+#              type: string
+#              default: down
+#
+#  itemOperations:
+#    get:
+#      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+#      security_message: 'Sorry, but you are not authorized.'

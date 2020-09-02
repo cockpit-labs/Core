@@ -1,0 +1,13 @@
+easy_admin:
+  entities:
+    TemplateBlock:
+      class: App\Entity\TplBlock
+      label: Blocks
+      list:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+      form:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}

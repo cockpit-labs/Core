@@ -1,0 +1,17 @@
+easy_admin:
+  entities:
+    Calendar:
+      class: App\Entity\Calendar
+      label: Calendars
+      list:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+          - {property: 'start', label: 'Start', 'format': 'd/m/y'}
+          - {property: 'end', 'label': 'End', 'format': 'd/m/y'}
+      form:
+        fields:
+          - {property: 'label'}
+          - {property: 'description'}
+          - {property: 'start', label: 'Start', type: 'App\Form\DatePickerType'}
+          - {property: 'end', 'label': 'End', type: 'App\Form\DatePickerType'}
