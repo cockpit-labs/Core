@@ -50,7 +50,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ORM\Entity
  *
  * @ApiFilter(DateFilter::class, properties={"updatedAt"})
- * @ApiFilter(SearchFilter::class, properties={"tplFolder.id": "exact", "target": "exact"})
+ * @ApiFilter(SearchFilter::class, properties={"tplFolder.id": "exact", "target": "exact", "parentTargets": "partial"})
  *
  */
 class Folder
@@ -116,12 +116,14 @@ class Folder
      * @Groups({"Folder:Read"})
      */
     public $periodStart;
+
     /**
      * @var \DateTime
      * @ORM\Column(name="period_end", type="datetime", nullable=true)
      * @Groups({"Folder:Read"})
      */
     public $periodEnd;
+
     /**
      * @var string
      *
@@ -132,6 +134,17 @@ class Folder
      * @Groups({"Score"})
      */
     private $target;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="parent_targets", type="string", length=1000, nullable=false)
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Create"})
+     * @Groups({"Score"})
+     */
+    private $parentTargets;
+
     /**
      * @var tplFolder
      *
@@ -144,6 +157,7 @@ class Folder
      * @Groups({"Folder:Create"})
      */
     private $tplFolder;
+
     /**
      * @var Collection
      *
@@ -216,6 +230,18 @@ class Folder
     public function setTarget(string $target): self
     {
         $this->target = $target;
+
+        return $this;
+    }
+
+    public function getParentTargets(): ?string
+    {
+        return $this->parentTargets;
+    }
+
+    public function setParentTargets(string $parentTargets): self
+    {
+        $this->parentTargets = $parentTargets;
 
         return $this;
     }
