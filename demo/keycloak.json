@@ -432,203 +432,320 @@
   },
   "groups": [
     {
+      "id": "9235ede9-a7fe-4df5-87ac-e6e08d69cc14",
       "name": "Functions",
-      "path": "\/Functions",
+      "path": "/Functions",
+      "attributes": {},
       "realmRoles": [
         "CCEUser",
         "CCEDashboard"
       ],
+      "clientRoles": {},
       "subGroups": [
         {
+          "id": "df3ccc0a-5abd-4f53-a0ae-7b2f3debc5c7",
           "name": "Country Head",
-          "path": "\/Functions\/Country Head",
+          "path": "/Functions/Country Head",
+          "attributes": {},
           "realmRoles": [
             "CCECountryManager"
-          ]
+          ],
+          "clientRoles": {},
+          "subGroups": []
         },
         {
-          "name": "Regional Director",
-          "path": "\/Functions\/Regional Director",
-          "realmRoles": [
-            "CCERegionManager"
-          ]
-        },
-        {
-          "name": "District Manager",
-          "path": "\/Functions\/District Manager",
-          "realmRoles": [
-            "CCEDistrictManager"
-          ]
-        },
-        {
-          "name": "Store Manager",
-          "path": "\/Functions\/Store Manager",
-          "realmRoles": [
-            "CCEStoreManager"
-          ]
-        },
-        {
+          "id": "aee581f0-c7de-4c73-a68d-f77d93eebe83",
           "name": "Superuser",
-          "path": "\/Functions\/Superuser",
+          "path": "/Functions/Superuser",
+          "attributes": {},
           "realmRoles": [
             "CCEAdmin"
-          ]
+          ],
+          "clientRoles": {},
+          "subGroups": []
+        },
+        {
+          "id": "e938b131-1db5-4fef-8156-ee1192869723",
+          "name": "Regional Director",
+          "path": "/Functions/Regional Director",
+          "attributes": {},
+          "realmRoles": [
+            "CCERegionManager"
+          ],
+          "clientRoles": {},
+          "subGroups": []
+        },
+        {
+          "id": "1dc22d46-65b5-459c-bb4b-48225b25083d",
+          "name": "District Manager",
+          "path": "/Functions/District Manager",
+          "attributes": {},
+          "realmRoles": [
+            "CCEDistrictManager"
+          ],
+          "clientRoles": {},
+          "subGroups": []
+        },
+        {
+          "id": "532798db-c1ca-44f9-bf77-6c5e99672366",
+          "name": "Store Manager",
+          "path": "/Functions/Store Manager",
+          "attributes": {},
+          "realmRoles": [
+            "CCEStoreManager"
+          ],
+          "clientRoles": {},
+          "subGroups": []
         }
       ]
     },
     {
+      "id": "80d83470-63f3-422e-a795-0c6d949b2007",
       "name": "Network",
-      "path": "\/Network",
+      "path": "/Network",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
       "subGroups": [
         {
+          "id": "a3d1e8a1-c8f4-44ee-ac63-acdc0685cc18",
           "name": "COUNTRY",
-          "path": "\/_Reseau\/COUNTRY",
-          "realmRoles": [
-          ],
+          "path": "/Network/COUNTRY",
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {},
           "subGroups": [
             {
+              "id": "9224b187-5451-4907-bb0a-a1cdeee9f3ca",
               "name": "REGION-NORTH",
-              "path": "\/_Reseau\/COUNTRY\/REGION-NORTH",
+              "path": "/Network/COUNTRY/REGION-NORTH",
+              "attributes": {},
+              "realmRoles": [],
+              "clientRoles": {},
               "subGroups": [
                 {
-                  "name": "DISTRICT-NORTHEAST",
-                  "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST",
+                  "id": "b4c146cc-1ab8-4bb3-bde9-23e72ada7cc9",
+                  "name": "DISTRICT-NORTHWEST",
+                  "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHWEST",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
                   "subGroups": [
                     {
-                      "name": "Store-11",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST\/Store-11",
+                      "id": "fab3e7d7-a5f8-4d11-9f3a-32e5bb851c78",
+                      "name": "Store-21",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHWEST/Store-21",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-12",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST\/Store-12",
+                      "id": "ecdd4a49-0286-4292-b66e-2ec155c36feb",
+                      "name": "Store-23",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHWEST/Store-23",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-13",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST\/Store-13",
+                      "id": "6efc97c5-e3a8-4b53-8f8b-0d2f5d2c63db",
+                      "name": "Store-22",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHWEST/Store-22",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-14",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST\/Store-14",
+                      "id": "2dc43508-ff64-4ccd-a78b-bb683c7b5ae8",
+                      "name": "Store-24",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHWEST/Store-24",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     }
                   ]
                 },
                 {
-                  "name": "DISTRICT-NORTHWEST",
-                  "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHEAST",
+                  "id": "8ffa0a4f-13eb-4c83-8671-0bef995738a5",
+                  "name": "DISTRICT-NORTHEAST",
+                  "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHEAST",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
                   "subGroups": [
                     {
-                      "name": "Store-21",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHWEST\/Store-21",
+                      "id": "da3dd43f-e704-42ec-b454-1dc67f8d71a4",
+                      "name": "Store-13",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHEAST/Store-13",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-22",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHWEST\/Store-22",
+                      "id": "bff77cc3-204e-4b5d-9744-af39dfffb6c1",
+                      "name": "Store-14",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHEAST/Store-14",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-23",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHWEST\/Store-23",
+                      "id": "93b3bd2f-02c5-435d-9cdd-44d4ed9be406",
+                      "name": "Store-12",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHEAST/Store-12",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-24",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-NORTH\/DISTRICT-NORTHWEST\/Store-24",
+                      "id": "4edc9184-daee-4a52-98a3-a4976fbfca3e",
+                      "name": "Store-11",
+                      "path": "/Network/COUNTRY/REGION-NORTH/DISTRICT-NORTHEAST/Store-11",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     }
                   ]
                 }
               ]
             },
             {
+              "id": "2265783e-4e09-437a-9b3d-a094c15a767e",
               "name": "REGION-SOUTH",
-              "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH",
+              "path": "/Network/COUNTRY/REGION-SOUTH",
+              "attributes": {},
+              "realmRoles": [],
+              "clientRoles": {},
               "subGroups": [
                 {
+                  "id": "e9468a46-daa4-46da-bb35-483a046fc371",
                   "name": "DISTRICT-SOUTHEAST",
-                  "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHEAST",
+                  "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHEAST",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
                   "subGroups": [
                     {
-                      "name": "Store-31",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHEAST\/Store-31",
-                      "realmRoles": [
-                        "CCEStore"
-                      ]
-                    },
-                    {
-                      "name": "Store-32",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHEAST\/Store-32",
-                      "realmRoles": [
-                        "CCEStore"
-                      ]
-                    },
-                    {
+                      "id": "294c1567-5b07-478f-8b6a-946522128ff9",
                       "name": "Store-33",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHEAST\/Store-33",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHEAST/Store-33",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-34",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHEAST\/Store-34",
+                      "id": "07f07589-1ec6-4d6b-9c62-f9596f0ccf87",
+                      "name": "Store-31",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHEAST/Store-31",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
+                    },
+                    {
+                      "id": "71940ca8-81bc-4003-8a05-b065261aea83",
+                      "name": "Store-34",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHEAST/Store-34",
+                      "attributes": {},
+                      "realmRoles": [
+                        "CCEStore"
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
+                    },
+                    {
+                      "id": "4851cb41-f20c-46f2-82b6-7b17f8192565",
+                      "name": "Store-32",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHEAST/Store-32",
+                      "attributes": {},
+                      "realmRoles": [
+                        "CCEStore"
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     }
                   ]
                 },
                 {
+                  "id": "245061a7-d620-44a0-9ef8-d176dd59eab5",
                   "name": "DISTRICT-SOUTHWEST",
-                  "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHWEST",
+                  "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHWEST",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
                   "subGroups": [
                     {
-                      "name": "Store-41",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHWEST\/Store-41",
-                      "realmRoles": [
-                        "CCEStore"
-                      ]
-                    },
-                    {
-                      "name": "Store-42",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHWEST\/Store-42",
-                      "realmRoles": [
-                        "CCEStore"
-                      ]
-                    },
-                    {
+                      "id": "0afcc992-420d-4da4-b404-aed4c49e2cdb",
                       "name": "Store-43",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHWEST\/Store-43",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHWEST/Store-43",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     },
                     {
-                      "name": "Store-44",
-                      "path": "\/_Reseau\/COUNTRY\/REGION-SOUTH\/DISTRICT-SOUTHWEST\/Store-44",
+                      "id": "23bc30a5-5242-4bd5-b332-113d21112114",
+                      "name": "Store-41",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHWEST/Store-41",
+                      "attributes": {},
                       "realmRoles": [
                         "CCEStore"
-                      ]
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
+                    },
+                    {
+                      "id": "f803946a-9ea8-4bf6-b9c0-3f7abaa29f5b",
+                      "name": "Store-42",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHWEST/Store-42",
+                      "attributes": {},
+                      "realmRoles": [
+                        "CCEStore"
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
+                    },
+                    {
+                      "id": "8df8c2c1-d8bc-4dfc-8f0a-8b7e603ff8d8",
+                      "name": "Store-44",
+                      "path": "/Network/COUNTRY/REGION-SOUTH/DISTRICT-SOUTHWEST/Store-44",
+                      "attributes": {},
+                      "realmRoles": [
+                        "CCEStore"
+                      ],
+                      "clientRoles": {},
+                      "subGroups": []
                     }
                   ]
                 }

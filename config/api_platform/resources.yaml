@@ -165,6 +165,7 @@ App\Entity\Folder:
       security_message: 'Sorry, but you are not authorized.'
       normalization_context:
         groups:
+          - 'Folder:Read'
           - 'Blame'
           - 'Timestamp'
           - 'Resource'

@@ -89,6 +89,7 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
         $tplFolder = $folder->getTplFolder();
         $this->getEntityManager()->initializeObject($tplFolder);
 
+        // Set template description if no description provided
         if (!empty($tplFolder->getDescription())) {
             $folder->setDescription($tplFolder->getDescription());
         }
@@ -102,11 +103,14 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
             $folder->setPeriodStart(min($calendar->getPeriodStart(), $folder->getPeriodStart()));
         }
 
+        // Set template label if no label provided
         if (!empty($tplFolder->getLabel())) {
             $folder->setLabel($tplFolder->getLabel());
         }
+
         $folder->setCreatedBy($this->getUser()->getUsername());
         $folder->setUpdatedBy($this->getUser()->getUsername());
+
         $tplQuestionnaires = $tplFolder->getTplQuestionnaires();
         // instanciate questionnaires for this new folder
         foreach ($tplQuestionnaires as $questionnaireTmpl) {
@@ -115,6 +119,17 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
             $questionnaire = $this->createQuestionnaire($questionnaireTmpl);
             $folder->addQuestionnaire($questionnaire);
         }
+
+        // get target parent
+        $target=$this->getKeycloakConnector()->getGroup($folder->getTarget());
+        $parentTargets=array_map(function ($val) {
+            return sprintf("%s", $val['id']);
+        }, $this->getKeycloakConnector()->getParentGroups($target));
+        $parentTargets[]=$target['id'];
+        $folder->setParentTargets(implode(
+            '/',
+            $parentTargets));
+
         return $folder;
     }
 

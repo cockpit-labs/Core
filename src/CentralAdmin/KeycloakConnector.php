@@ -288,7 +288,11 @@ class KeycloakConnector
         $func = function ($group) use ($refPath) {
             return substr($group['path'], 0, strlen($refPath)) === $refPath;
         };
-        return array_filter($this->getFlatGroups(), $func);
+        $groups=array_filter($this->getFlatGroups(), $func);
+        usort($groups, function($a, $b){
+            return $a['path']<=>$b['path'];
+        });
+        return $groups;
     }
 
     /**
@@ -359,7 +363,11 @@ class KeycloakConnector
         $func = function ($group) use ($refPath) {
             return (substr($refPath, 0, strlen($group['path'])) === $group['path']) && ($group['path'] != $refPath);
         };
-        return array_filter($this->getFlatGroups(), $func);
+        $groups=array_filter($this->getFlatGroups(), $func);
+        usort($groups, function($a, $b){
+            return $a['path']<=>$b['path'];
+        });
+        return $groups;
 
     }
 

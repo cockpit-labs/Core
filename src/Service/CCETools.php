@@ -34,6 +34,23 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class CCETools
 {
+    public static function filename($param, $name, $default = '')
+    {
+        $result = $default;
+        if (is_a($param, Container::class)) {
+            $param = $param->getParameterBag();
+        }
+        if (is_a($param, Parameter::class)
+            || is_a($param, ParameterBag::class)
+            || is_a($param, FrozenParameterBag::class)
+            || is_a($param, ContainerBag::class)
+            && $param->has($name)) {
+            $result = file_exists($param->get($name)) ? $param->get($name) : $default;
+        }
+
+        return $result;
+    }
+
     public static function param($param, $name, $default = '')
     {
         $result = $default;

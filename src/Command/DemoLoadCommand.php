@@ -74,7 +74,7 @@ class DemoLoadCommand extends Command
         "tiara.goyette",
         "zoie.goldner"
     ];
-    private          $normalUserTests        = [
+    private          $normalUserTests   = [
         "kallie.dibbert",
         "zoie.goldner"
     ];
@@ -150,7 +150,7 @@ class DemoLoadCommand extends Command
     private function cleanStorage()
     {
         $files = $this->mediaFilesystem->listContents('/', true);
-        foreach ($files as $file){
+        foreach ($files as $file) {
             $this->mediaFilesystem->delete($file['path']);
         }
     }
@@ -182,10 +182,10 @@ class DemoLoadCommand extends Command
      * @return \ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Response|\Symfony\Contracts\browserClient\ResponseInterface
      * @throws \Symfony\Contracts\browserClient\Exception\TransportExceptionInterface
      */
-    private function doGetRequest($class, $id = null, $additionnalRoute = "", $headers = [], $files = [])
+    private function doGetRequest($class, $id = null, $additionnalRoute = "", $params = [], $files = [])
     {
         $this->init();
-        $opt = empty($headers) ? $this->headers : $headers;
+        $opt = $this->headers;
         if (is_array($id)) {
             $iri = static::findIriBy($class, $id);
         } else {
@@ -195,6 +195,9 @@ class DemoLoadCommand extends Command
             }
         }
         $iri = rtrim($iri . "/$additionnalRoute", '/');
+        if (!empty($params)) {
+            $opt['query'] = $params;
+        }
         return $this->doRequest($iri, 'GET', $opt, $files);
     }
 
@@ -466,13 +469,6 @@ class DemoLoadCommand extends Command
                                                            'Accept'    => 'application/json, text/plain'
                                                        ]);
 
-        $adminKc = new KeycloakConnector(
-            CCETools::param($this->params, 'CCE_KEYCLOAKURL'),
-            ['username' => $this->kc_admin, 'password' => $this->kc_adminpwd],
-            'admin-cli',
-            'master'
-        );
-
         if (!file_exists($keycloakFile)) {
             $this->output->write("<error>file $keycloakFile does not exists</error>\n");
             return -1;
@@ -500,6 +496,13 @@ class DemoLoadCommand extends Command
         $this->output->write("\n\t<info>importing $keycloakFile</info>\n");
         $realmData                     = json_decode($keycloakJSON, true, 128);
         $realmData['ifResourceExists'] = 'OVERWRITE';
+
+        $adminKc = new KeycloakConnector(
+            CCETools::param($this->params, 'CCE_KEYCLOAKURL'),
+            ['username' => $this->kc_admin, 'password' => $this->kc_adminpwd],
+            'admin-cli',
+            'master'
+        );
 
         $adminKc->partialImport($this->kc_realm, $keycloakJSON);
 
@@ -569,7 +572,7 @@ class DemoLoadCommand extends Command
                                 $this->idMapping[$currentLocalid] = $response['id'];
                             }
                         } else {
-                            $c=$response->getContent();
+                            $c     = $response->getContent();
                             $error = json_decode($response->getContent(), JSON_PRETTY_PRINT);
 
                             $this->output->write("<error>$error</error>\n");
@@ -594,13 +597,16 @@ class DemoLoadCommand extends Command
             $currentUser = $this->normalUser[$i];
             $this->output->write("<info>Processing user $currentUser </info>\n");
             // get targets
-            $response   = $this->doGetRequest(Target::class);
+            $response   = $this->doGetRequest(Target::class, null, null, ['right' => 'CREATE']);
             $statusCode = $response->getStatusCode();
             if ($statusCode == 200) {
                 $targets = json_decode($response->getContent(), true);
 
                 // process each target
                 foreach ($targets as $target) {
+                    if (!in_array('CREATE', $target['rights'])) {
+                        continue;
+                    }
                     // get TplFolders
                     $response   = $this->doGetRequest(TplFolder::class, null, 'periods');
                     $statusCode = $response->getStatusCode();
@@ -693,16 +699,16 @@ class DemoLoadCommand extends Command
 
         // check src owner and permissions
 
-        $entitiesToIgnore=['src/Entity/TplFolderCalendar.php', 'src/Entity/TplFolderQuestionnaire.php'];
+        $entitiesToIgnore = ['src/Entity/TplFolderCalendar.php', 'src/Entity/TplFolderQuestionnaire.php'];
 
-        $error=false;
-        foreach ($entitiesToIgnore as $entity){
-            if(!is_writable($entity)){
+        $error = false;
+        foreach ($entitiesToIgnore as $entity) {
+            if (!is_writable($entity)) {
                 $this->output->writeln(sprintf("<error>file '%s' not writable </error>", $entity));
-                $error=true;
+                $error = true;
             }
         }
-        if($error){
+        if ($error) {
             exit(1);
         }
 
@@ -983,8 +989,8 @@ class DemoLoadCommand extends Command
         $keycloak  = $input->getOption('keycloak');
         $templates = $input->getOption('template');
         $data      = $input->getOption('data');
-        if($input->getOption('tests')){
-            $this->normalPwd=$this->normalUser=$this->normalUserTests;
+        if ($input->getOption('tests')) {
+            $this->normalPwd = $this->normalUser = $this->normalUserTests;
         }
 
         if (!empty($keycloak)) {
