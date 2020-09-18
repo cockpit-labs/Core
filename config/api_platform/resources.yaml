@@ -214,6 +214,9 @@ App\Entity\Folder:
       denormalization_context:
         groups:
           - 'none'
+      normalization_context:
+        groups:
+          - 'Submit'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
 
@@ -345,6 +348,9 @@ App\Entity\Questionnaire:
       path: /questionnaires/stats
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get questionnaires stats'
+        description: ''
       normalization_context:
         groups:
           - 'Blame'
@@ -354,9 +360,6 @@ App\Entity\Questionnaire:
           - 'Description'
           - 'Score'
         skip_null_values: false
-  #    post:
-  #      security: is_granted('ROLE_CCEUser')
-  #      security_message: 'Sorry, but you are not authorized.'
 
   itemOperations:
     delete:
@@ -365,11 +368,26 @@ App\Entity\Questionnaire:
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
+    pdf:
+      method: GET
+      path: /questionnaires/{id}/pdf
+      controller: App\Controller\GetQuestionnairePDFContentAction
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get questionnaire PDF'
+        description: ''
+      normalization_context:
+        groups:
+          - 'Resource'
     getstat:
       method: GET
       path: /questionnaires/{id}/stats
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Get questionnaire stats'
+        description: ''
       normalization_context:
         groups:
           - 'Blame'

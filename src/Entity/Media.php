@@ -56,7 +56,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @ORM\DiscriminatorColumn(name="type", type="string", length=4)
  * @ORM\DiscriminatorMap({
  *     "User"="UserMedia",
- *     "Tpl"="TplMedia"
+ *     "Tpl"="TplMedia",
+ *     "QPdf"="QuestionnairePDFMedia"
  * })
  *
  * @Vich\Uploadable

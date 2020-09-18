@@ -41,8 +41,8 @@ final class TplFolderDataTransformer extends KeycloakDataProvider implements Dat
     {
 
         $permissions_right = '';
-        if (!empty($this->request->get('permissions_right'))) {
-            $permissions_right = strtoupper($this->request->get('permissions_right'));
+        if (!empty($this->getRequest()->get('permissions_right'))) {
+            $permissions_right = strtoupper($this->getRequest()->get('permissions_right'));
         }
 
         if (empty($this->getUser()) || $this->getAppClient() === \App\Service\CCETools::param($this->getParameters(),
@@ -51,12 +51,12 @@ final class TplFolderDataTransformer extends KeycloakDataProvider implements Dat
         }
         $toInterval   = '9999-01-01';
         $fromInterval = '1900-01-01';
-        if (!empty($this->request->get('fromdate'))) {
-            $fromInterval = $this->request->get('fromdate');
+        if (!empty($this->getRequest()->get('fromdate'))) {
+            $fromInterval = $this->getRequest()->get('fromdate');
         }
 
-        if (!empty($this->request->get('todate'))) {
-            $toInterval = $this->request->get('todate');
+        if (!empty($this->getRequest()->get('todate'))) {
+            $toInterval = $this->getRequest()->get('todate');
         }
 
 
@@ -113,9 +113,6 @@ final class TplFolderDataTransformer extends KeycloakDataProvider implements Dat
         // remove tplFolderPermissions that related to roles that are not affected to user
         $permissions=$data->getPermissions();
         foreach ($permissions as $permission) {
-            $role=KeycloakConnector::toSymfonyRole($permission->getRole());
-            $userRoles=$this->getUser()->getRoles();
-            $b=in_array($role, $userRoles);
             if(!in_array(KeycloakConnector::toSymfonyRole($permission->getRole()), $this->getUser()->getRoles())){
                 $data->removePermission($permission);
             }

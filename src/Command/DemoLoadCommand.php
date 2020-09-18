@@ -1001,6 +1001,7 @@ class DemoLoadCommand extends Command
         }
 
         if ($input->getOption('rebuild')) {
+            $this->cleanStorage();
             $this->rebuildDB();
         }
 
@@ -1012,6 +1013,7 @@ class DemoLoadCommand extends Command
 
         if ($input->getOption('cleandata')) {
             $this->getToken(true); // force token regenerate
+            $this->cleanStorage();
             $this->cleanTables(true);
         }
 

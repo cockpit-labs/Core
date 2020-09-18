@@ -28,14 +28,28 @@ namespace App\DataProvider;
 use ApiPlatform\Core\Api\IriConverterInterface;
 use App\CentralAdmin;
 use Doctrine\ORM\EntityManagerInterface;
+use League\Flysystem\FilesystemInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class KeycloakDataProvider
 {
+    /**
+     * @var \Symfony\Component\HttpFoundation\Request|null
+     */
+    private $request;
+    /**
+     * @var \Twig\Environment;
+     */
+    private $twig;
+    /**
+     * @var \League\Flysystem\FilesystemInterface
+     */
+    private $mediaFS;
     /**
      * @var CentralAdmin\KeycloakConnector
      */
@@ -72,12 +86,6 @@ class KeycloakDataProvider
      * @var string
      */
     private $appClient = '';
-
-    /**
-     * @var \Symfony\Component\HttpFoundation\Request|null
-     */
-    public $request;
-
     /**
      * @var NormalizerInterface|null
      */
@@ -86,11 +94,14 @@ class KeycloakDataProvider
      * @var \Doctrine\ORM\EntityManagerInterface
      */
     private $entityManager;
-
     /**
      * @var ParameterBagInterface|null
      */
     private $parameters;
+    /**
+     * @var \Symfony\Component\HttpKernel\KernelInterface
+     */
+    private $kernel;
 
     public function __construct(
         Security $security,
@@ -98,23 +109,27 @@ class KeycloakDataProvider
         IriConverterInterface $iriService,
         NormalizerInterface $normalizer,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack
+        \Twig\Environment $twig,
+        FilesystemInterface $mediafsFilesystem,
+        RequestStack $requestStack,
+        KernelInterface $kernel
     ) {
-
+        $this->mediaFS       = $mediafsFilesystem;
         $this->normalizer    = $normalizer;
         $this->entityManager = $entityManager;
         $this->parameters    = $params;
-
+        $this->twig          = $twig;
+        $this->kernel        = $kernel;
         if ($security->getToken() != null) {
             // get user
             $this->user      = $security->getToken()->getUser();
             $this->appClient = $this->user->getClient();
         }
         // set keycloak env
-        $this->keycloakSecret = \App\Service\CCETools::param($params,'CCE_KEYCLOAKSECRET');
-        $this->keycloakUrl    = \App\Service\CCETools::param($params,'CCE_KEYCLOAKURL');
-        $this->keycloakClient = \App\Service\CCETools::param($params,'CCE_coreclient');
-        $this->keycloakRealm  = \App\Service\CCETools::param($params,'CCE_KEYCLOAKREALM');
+        $this->keycloakSecret = \App\Service\CCETools::param($params, 'CCE_KEYCLOAKSECRET');
+        $this->keycloakUrl    = \App\Service\CCETools::param($params, 'CCE_KEYCLOAKURL');
+        $this->keycloakClient = \App\Service\CCETools::param($params, 'CCE_coreclient');
+        $this->keycloakRealm  = \App\Service\CCETools::param($params, 'CCE_KEYCLOAKREALM');
         $this->iriService     = $iriService;
         $this->request        = $requestStack->getCurrentRequest();
     }
@@ -144,6 +159,14 @@ class KeycloakDataProvider
     }
 
     /**
+     * @return \Symfony\Component\HttpKernel\KernelInterface
+     */
+    public function getKernel(): \Symfony\Component\HttpKernel\KernelInterface
+    {
+        return $this->kernel;
+    }
+
+    /**
      * @return CentralAdmin\KeycloakConnector
      */
     public function getKeycloakConnector(): CentralAdmin\KeycloakConnector
@@ -160,6 +183,14 @@ class KeycloakDataProvider
     }
 
     /**
+     * @return \League\Flysystem\FilesystemInterface
+     */
+    public function getMediaFS(): \League\Flysystem\FilesystemInterface
+    {
+        return $this->mediaFS;
+    }
+
+    /**
      * @return \Symfony\Component\Serializer\Normalizer\NormalizerInterface|null
      */
     public function getNormalizer(): ?NormalizerInterface
@@ -173,6 +204,22 @@ class KeycloakDataProvider
     public function getParameters(): ?ParameterBagInterface
     {
         return $this->parameters;
+    }
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\Request|null
+     */
+    public function getRequest(): ?\Symfony\Component\HttpFoundation\Request
+    {
+        return $this->request;
+    }
+
+    /**
+     * @return \Twig\Environment
+     */
+    public function getTwig(): \Twig\Environment
+    {
+        return $this->twig;
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /*
  * Core
- * GetUserMediaContentAction.php
+ * GetQuestionnairePDFMediaContentAction.php
  *
  * Copyright (c) 2020 Sentinelo
  *
@@ -25,19 +25,37 @@
 
 namespace App\Controller;
 
-use App\Entity\UserMedia;
+use App\Entity\QuestionnairePDFMedia;
 use League\Flysystem\FilesystemInterface;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-final class GetUserMediaContentAction extends GetMediaContentAction
+final class GetQuestionnairePDFMediaContentAction extends GetMediaContentAction
 {
     /**
-     * GetUserMediaContentAction constructor.
+     * GetTplMediaContentAction constructor.
      *
      * @param \League\Flysystem\FilesystemInterface $mediafsFilesystem
      */
     public function __construct(FilesystemInterface $mediafsFilesystem)
     {
-        $this->setMediaClass(UserMedia::class);
+        $this->setMediaClass(QuestionnairePDFMedia::class);
+        $this->setDownload(false);
         parent::__construct($mediafsFilesystem);
     }
+    /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \League\Flysystem\FileNotFoundException
+     */
+    public function __invoke(Request $request): Response
+    {
+        $this->setDownload($request->get('download', 'false') != 'false');
+        return parent::__invoke($request);
+    }
+
 }

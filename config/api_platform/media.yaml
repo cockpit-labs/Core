@@ -124,6 +124,46 @@ App\Entity\TplMedia:
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
+    getcontent:
+      controller: App\Controller\GetUserMediaContentAction
+      method: GET
+      path: '/tpl_media/{id}/content'
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
     patch:
       security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+##################################
+App\Entity\QuestionnairePDFMedia:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'Media'
+
+    normalization_context:
+      groups:
+        - 'Media'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      path: '/questionnaire_pdf/'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      path: '/questionnaire_pdf/{id}'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      path: '/questionnaire_pdf/{id}'
+    getcontent:
+      controller: App\Controller\GetQuestionnairePDFMediaContentAction
+      method: GET
+      path: '/questionnaire_pdf/{id}/content'
+      security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'

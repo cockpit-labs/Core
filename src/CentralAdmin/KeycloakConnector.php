@@ -46,15 +46,17 @@ class KeycloakConnector
     public const  KCREALMROLES     = "realmRoles";
     private const ATTRIBUTE_HIDDEN = "hidden";
     private const ATTRIBUTES       = "attributes";
+
+    private const BEARER = "Bearer ";
+    private const BASEURL = "/auth/admin/realms/";
     /**
      * @var array
      */
     private $flatGroups = [];
 
-    private $keycloakSecret    = '';
-    private $username          = '';
-    private $password          = '';
-    private $keycloakClientApp = '';
+    private $keycloakSecret = '';
+    private $username       = '';
+    private $password       = '';
     /**
      * @var array
      */
@@ -63,10 +65,6 @@ class KeycloakConnector
      * @var string
      */
     private $token = "";
-    /**
-     * @var array
-     */
-    private $pathList = [];
 
     /**
      * keycloakConnector constructor.
@@ -94,7 +92,7 @@ class KeycloakConnector
         $this->keycloakUrl       = $keycloakUrl;
         $this->keycloakClient    = $keycloakClient;
         $this->keycloakRealm     = $keycloakRealm;
-        $this->keycloakApiPath   = $keycloakUrl . '/auth/admin/realms/' . $this->keycloakRealm;
+        $this->keycloakApiPath   = $keycloakUrl . static::BASEURL . $this->keycloakRealm;
         $this->keycloakTokenPath =
             $keycloakUrl . '/auth/realms/' . $this->keycloakRealm . '/protocol/openid-connect/token';
 
@@ -107,7 +105,7 @@ class KeycloakConnector
         }
 
         $options['base_uri'] = $keycloakUrl;
-        $options['headers']  = ['Authorization' => 'Bearer ' . $this->token];
+        $options['headers']  = ['Authorization' => static::BEARER . $this->token];
         $this->httpClient    = new Client($options);
 
         // init groups
@@ -192,11 +190,11 @@ class KeycloakConnector
 
     private function enhanceGroups(array $groups)
     {
-        $enhGroups=[];
+        $enhGroups = [];
         $allGroups = $this->getFlatGroups();
-        foreach ($groups as $idx=>&$group) {
+        foreach ($groups as &$group) {
             if (!empty($allGroups[$group['id']])) {
-                $enhGroups[$group['id']]=$allGroups[$group['id']];
+                $enhGroups[$group['id']] = $allGroups[$group['id']];
             }
         }
         return $enhGroups;
@@ -285,12 +283,12 @@ class KeycloakConnector
     {
         $refPath = $group['path'];
 
-        $func = function ($group) use ($refPath) {
+        $func   = function ($group) use ($refPath) {
             return substr($group['path'], 0, strlen($refPath)) === $refPath;
         };
-        $groups=array_filter($this->getFlatGroups(), $func);
-        usort($groups, function($a, $b){
-            return $a['path']<=>$b['path'];
+        $groups = array_filter($this->getFlatGroups(), $func);
+        usort($groups, function ($a, $b) {
+            return $a['path'] <=> $b['path'];
         });
         return $groups;
     }
@@ -360,12 +358,12 @@ class KeycloakConnector
     {
         $refPath = $group['path'];
 
-        $func = function ($group) use ($refPath) {
+        $func   = function ($group) use ($refPath) {
             return (substr($refPath, 0, strlen($group['path'])) === $group['path']) && ($group['path'] != $refPath);
         };
-        $groups=array_filter($this->getFlatGroups(), $func);
-        usort($groups, function($a, $b){
-            return $a['path']<=>$b['path'];
+        $groups = array_filter($this->getFlatGroups(), $func);
+        usort($groups, function ($a, $b) {
+            return $a['path'] <=> $b['path'];
         });
         return $groups;
 
@@ -442,13 +440,11 @@ class KeycloakConnector
                 $groupPath = $group['path'];
                 foreach ($userGroups as $userGroup) {
                     $path = $userGroup['path'];
-                    if ($groupPath === $path) {
-                        return true;
-                    } elseif ($membershipDirection == self::DOWNMEMBERSHIP && substr($groupPath, 0,
-                                                                                     strlen($path)) === $path) {
-                        return true;
-                    } elseif ($membershipDirection == self::UPMEMBERSHIP && substr($path, 0,
-                                                                                   strlen($groupPath)) === $groupPath) {
+                    if (($groupPath === $path)
+                        || ($membershipDirection == self::DOWNMEMBERSHIP && substr($groupPath, 0,
+                                                                                   strlen($path)) === $path)
+                        || ($membershipDirection == self::UPMEMBERSHIP && substr($path, 0,
+                                                                                 strlen($groupPath)) === $groupPath)) {
                         return true;
                     }
                 }
@@ -459,7 +455,7 @@ class KeycloakConnector
                 $userGroups = array_filter($this->getFlatGroups(), $getLegacyGroupsFunc);
             }
             $tmpUserGroups = [];
-            foreach ($userGroups as $id=>$userGroup) {
+            foreach ($userGroups as $id => $userGroup) {
                 if (empty($roles) || count(array_intersect($userGroup['realmRoles'], $roles)) > 0) {
                     $tmpUserGroups[$id] = $userGroup;
                 }
@@ -495,9 +491,14 @@ class KeycloakConnector
         }
     }
 
+    public function getUsers($searchstring): array
+    {
+        return $this->callAdminAPI("users", "GET", null, null, ['search' => $searchstring]);
+    }
+
     public function partialImport(string $realm, string $json)
     {
-        $url = $this->keycloakUrl . '/auth/admin/realms/' . $realm . '/partialImport';
+        $url = $this->keycloakUrl . static::BASEURL . $realm . '/partialImport';
 
         try {
             $client   = new Client(); //initialize a Guzzle client
@@ -505,7 +506,7 @@ class KeycloakConnector
                 'body'    => $json,
                 'headers' => [
                     'Accept'        => 'application/json, text/plain,*/*',
-                    'Authorization' => 'Bearer ' . $this->token,
+                    'Authorization' => static::BEARER . $this->token,
                     'Content-Type'  => 'application/json;charset=UTF-8',
                 ]
             ]);
@@ -568,18 +569,17 @@ class KeycloakConnector
 
     public function setUserPassword($userid, $realm, $newpassword)
     {
-        $url = $this->keycloakUrl . '/auth/admin/realms/' . $realm . '/users/' . $userid . '/reset-password';
+        $url = $this->keycloakUrl . static::BASEURL . $realm . '/users/' . $userid . '/reset-password';
         try {
             $client   = new Client(); //initialize a Guzzle client
             $response = $client->request('PUT', $url, [
                 'json'    => ['type' => 'password', 'temporary' => false, 'value' => $newpassword],
                 'headers' => [
                     'Accept'        => 'application/json, text/plain,*/*',
-                    'Authorization' => 'Bearer ' . $this->token,
+                    'Authorization' => static::BEARER . $this->token,
                     'Content-Type'  => 'application/json',
                 ]
             ]);
-
 
             return json_decode($response->getBody(), true);
 
@@ -611,7 +611,7 @@ class KeycloakConnector
     public static function toSymfonyRole(string $name): string
     {
         $prefix = 'ROLE_';
-        if (!(substr($name, 0, strlen($prefix)) === $prefix)) {
+        if (substr($name, 0, strlen($prefix)) !== $prefix) {
             $name = $prefix . $name;
         }
         return $name;

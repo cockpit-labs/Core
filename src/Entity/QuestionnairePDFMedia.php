@@ -1,7 +1,7 @@
 <?php
 /*
  * Core
- * GetUserMediaContentAction.php
+ * QuestionnairePDFMedia.php
  *
  * Copyright (c) 2020 Sentinelo
  *
@@ -23,21 +23,14 @@
  *
  */
 
-namespace App\Controller;
+namespace App\Entity;
 
-use App\Entity\UserMedia;
-use League\Flysystem\FilesystemInterface;
+use Doctrine\ORM\Mapping as ORM;
 
-final class GetUserMediaContentAction extends GetMediaContentAction
+/**
+ * @ORM\Entity
+ */
+class QuestionnairePDFMedia extends Media
 {
-    /**
-     * GetUserMediaContentAction constructor.
-     *
-     * @param \League\Flysystem\FilesystemInterface $mediafsFilesystem
-     */
-    public function __construct(FilesystemInterface $mediafsFilesystem)
-    {
-        $this->setMediaClass(UserMedia::class);
-        parent::__construct($mediafsFilesystem);
-    }
+
 }

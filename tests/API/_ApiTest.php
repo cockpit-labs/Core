@@ -35,6 +35,7 @@ use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Faker\Factory;
 use App\Service\CCETools;
+define('PDF_MAGIC', "\\x25\\x50\\x44\\x46\\x2D");
 
 /**
  * Class ApiTest
@@ -83,7 +84,12 @@ class ApiTest extends ApiTestCase
     private $roles;
     private $userId;
 
-    private function doRequest($url, $operation, $options, $file = [])
+    public function is_pdf($filename): bool
+    {
+        return (file_get_contents($filename, false, null, 0, strlen(PDF_MAGIC)) === PDF_MAGIC) ? true : false;
+    }
+
+    public function doRequest($url, $operation, $options, $file = [])
     {
         return $this->getbrowserClient()->request($operation, $url, $options, $file);
     }
@@ -235,6 +241,15 @@ class ApiTest extends ApiTestCase
         $iri = $iri . '/' . $id . '/' . $sub;
 
         return $this->doRequest($iri, 'GET', $options, $files);
+    }
+
+
+    public function getIdFromIri($iri): string
+    {
+        if(preg_match("/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/", $iri, $matches)){
+            return $matches[0];
+        }
+        return '';
     }
 
     /**

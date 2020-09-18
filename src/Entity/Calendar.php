@@ -253,7 +253,7 @@ class Calendar
         $this->periodEnd = $this->getEnd();
         if ($this->getCronEnd() !== null && Cron\CronExpression::isValidExpression($this->getCronEnd())) {
             $cron            = Cron\CronExpression::factory($this->getCronEnd());
-            $this->periodEnd = $cron->getNextRunDate();
+            $this->setPeriodEnd($cron->getNextRunDate());
         }
 
         return $this->periodEnd;
@@ -276,7 +276,7 @@ class Calendar
         $this->periodStart = $this->getStart();
         if ($this->getCronStart() !== null && Cron\CronExpression::isValidExpression($this->getCronStart())) {
             $cron              = Cron\CronExpression::factory($this->getCronStart());
-            $this->periodStart = $cron->getNextRunDate();
+            $this->setPeriodStart($cron->getNextRunDate());
         }
 
         return $this->periodStart;

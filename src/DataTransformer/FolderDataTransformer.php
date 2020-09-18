@@ -33,11 +33,14 @@ use App\Entity\Folder;
 use App\Entity\MediaOwner;
 use App\Entity\QuestionAnswer;
 use App\Entity\Questionnaire;
+use App\Entity\QuestionnairePDFMedia;
 use App\Entity\TplBlock;
 use App\Entity\TplQuestion;
 use App\Entity\TplQuestionnaire;
+use App\Service\CCETools;
 use App\Traits\stateableEntity;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 final class FolderDataTransformer extends KeycloakDataProvider implements DataTransformerInterface
@@ -121,14 +124,14 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
         }
 
         // get target parent
-        $target=$this->getKeycloakConnector()->getGroup($folder->getTarget());
-        $parentTargets=array_map(function ($val) {
+        $target          = $this->getKeycloakConnector()->getGroup($folder->getTarget());
+        $parentTargets   = array_map(function ($val) {
             return sprintf("%s", $val['id']);
         }, $this->getKeycloakConnector()->getParentGroups($target));
-        $parentTargets[]=$target['id'];
+        $parentTargets[] = $target['id'];
         $folder->setParentTargets(implode(
-            '/',
-            $parentTargets));
+                                      '/',
+                                      $parentTargets));
 
         return $folder;
     }
@@ -157,6 +160,56 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
             $questionnaire->addBlock($block);
         }
         return $questionnaire;
+    }
+
+    private function generatePDF(Folder &$folder)
+    {
+        foreach ($folder->getQuestionnaires() as &$questionnaire) {
+            // generate PDF
+
+            $data = $this->getNormalizer()->normalize($questionnaire);
+
+            $gotenbergURL=CCETools::param($this->getParameters(), 'CCE_GOTENBERGURL', 'http://localhost:3000');
+            $client   = new \TheCodingMachine\Gotenberg\Client($gotenbergURL,
+                                                               new \Http\Adapter\Guzzle6\Client());
+            $htmlData = $this->getTwig()->render('questionnaire.html.twig',
+                                            [
+                                                'questionnaire' => $data,
+                                            ]);
+
+            $html    = \TheCodingMachine\Gotenberg\DocumentFactory::makeFromString('qpdf.html', $htmlData);
+            $request = new \TheCodingMachine\Gotenberg\HTMLRequest($html);
+            $request->setMargins(\TheCodingMachine\Gotenberg\Request::NO_MARGINS);
+
+            $pdfTempFile = $this->getKernel()->getLocalTmpDir() . '/QPDF-' . $questionnaire->getId() . '.pdf';
+            $client->store($request, $pdfTempFile);
+
+            // create an 'uploaded' PDF
+            $pdfFile = new UploadedFile($pdfTempFile, 'Q' . $questionnaire->getId() . '.pdf', 'appication/pdf',
+                                        filesize($pdfTempFile), true);
+
+            // prepare new PDF
+            $pdf = new QuestionnairePDFMedia();
+            $pdf->setFile($pdfFile);
+
+            $oldPdf = $questionnaire->getPdf();
+
+            // set new PDF document, and remove old one
+            $questionnaire->setPdf($pdf);
+            if ($oldPdf) {
+                $this->getEntityManager()->remove($oldPdf);
+            }
+            $this->getEntityManager()->persist($pdf);
+            $this->getEntityManager()->flush();
+
+            // force old PDF Document removal (hardDelete) by removing a second time
+            if ($oldPdf) {
+                $this->getEntityManager()->remove($oldPdf);
+                $this->getEntityManager()->persist($pdf);
+                $this->getEntityManager()->flush();
+            }
+            unlink($pdfTempFile);
+        }
     }
 
     /**
@@ -223,6 +276,14 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
         $result = $this->expressionEngine->evaluate($expression);
 
         $answerValue->setValue($result);
+
+    }
+
+    private function submit(&$folder)
+    {
+        // force group
+        $this->context['groups'][] = "State";
+        $folder->setState(stateableEntity::getStateSubmitted());
 
     }
 
@@ -293,6 +354,7 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
                 $this->context['groups'][] = "Description";
                 $folder                    = $this->createFolder($folder);
                 break;
+
             case 'update':
                 // it's folder update
                 // let's process folder and questionnaire score
@@ -301,17 +363,18 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
                     $this->context['groups'][] = "Label";
                     $this->context['groups'][] = "Description";
                     $this->context['groups'][] = "Score";
-                    $folder                    = $this->processScore($folder);
-                    $folder                    = $this->updateFolder($folder);
+                    $this->processScore($folder);
+                    $this->updateFolder($folder);
                 } else {
                     throw new AccessDeniedHttpException();
                 }
                 break;
+
             case 'submit':
-                // force group
-                $this->context['groups'][] = "State";
-                $folder->setState(stateableEntity::getStateSubmitted());
+                $this->submit($folder);
+                $this->generatePDF($folder);
                 break;
+
             default:
                 // what?
                 // an unknown operation?

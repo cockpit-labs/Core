@@ -14,22 +14,31 @@
   {
     "Calendar": [
       {
-        "id": "calendar-odd",
+        "id": "calendar-mt",
         "start": "date:-6 weeks",
         "end": "date:+2 months",
-        "cronStart": "* * 1-31/2 * *",
-        "cronEnd": "* * 1-31/2 * *",
-        "label": "OddCalendar",
-        "description": "Calendar for year 2020, with period = odd days"
+        "cronStart": "* * * * 1",
+        "cronEnd": "* * * * 2",
+        "label": "monday and tuesday",
+        "description": "Calendar for year 2020, with period = monday and tuesday"
       },
       {
-        "id": "calendar-even",
+        "id": "calendar-wt",
         "start": "date:-6 weeks",
         "end": "date:+2 months",
-        "cronStart": "* * */2 * *",
-        "cronEnd": "* * */2 * *",
-        "label": "string",
-        "description": "Calendar for year 2020, with period = even days"
+        "cronStart": "* * * * 3",
+        "cronEnd": "* * * * 4",
+        "label": "wednesday and thursday",
+        "description": "Calendar for year 2020, with period = wednesday and thursday"
+      },
+      {
+        "id": "calendar-fs",
+        "start": "date:-6 weeks",
+        "end": "date:+2 months",
+        "cronStart": "* * * * 5",
+        "cronEnd": "* * * * 0",
+        "label": "friday to sunday",
+        "description": "Calendar for year 2020, with period = friday to sunday"
       }
     ]
   },
@@ -425,7 +434,8 @@
           "localid:TplQuestionnaire2"
         ],
         "calendars": [
-          "localid:calendar-odd"
+          "localid:calendar-mt",
+          "localid:calendar-fs"
         ],
         "minFolders": 1,
         "maxFolders": 1,
@@ -473,7 +483,7 @@
           "localid:TplQuestionnaire2"
         ],
         "calendars": [
-          "localid:calendar-even"
+          "localid:calendar-wt"
         ],
         "minFolders": 1,
         "maxFolders": 2,

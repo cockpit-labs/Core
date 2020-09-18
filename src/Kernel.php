@@ -31,7 +31,6 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-use Symfony\Component\Routing\RouteCollectionBuilder;
 use function dirname;
 use const PHP_VERSION_ID;
 
@@ -61,6 +60,17 @@ class Kernel extends BaseKernel
         $routes->import('../config/{routes}/' . $this->environment . "/*.$extensions");
         $routes->import("../config/{routes}/*.$extensions");
         $routes->import("../config/{routes}.$extensions");
+    }
+
+    public function getLocalTmpDir()
+    {
+
+        $localTmpDir = $this->getProjectDir() . '/tmp';
+        if (!file_exists($localTmpDir)) {
+
+            mkdir($localTmpDir);
+        }
+        return realpath($localTmpDir);
     }
 
     public function registerBundles(): iterable

@@ -27,8 +27,10 @@ namespace App\Controller;
 
 use League\Flysystem\FilesystemInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 abstract class GetMediaContentAction extends AbstractController
 {
@@ -41,6 +43,16 @@ abstract class GetMediaContentAction extends AbstractController
      * @var string
      */
     private $mediaClass = "";
+
+    /**
+     * @var bool
+     */
+    private $download = false;
+
+    /**
+     * @var string
+     */
+    private $id = '';
 
     /**
      * GetMediaContentAction constructor.
@@ -60,21 +72,95 @@ abstract class GetMediaContentAction extends AbstractController
      */
     public function __invoke(Request $request): Response
     {
-        $id = $request->get('id');
-
+        if(empty($this->getId())) {
+            $this->setId($request->get('id'));
+        }
         $media = $this->getDoctrine()
                       ->getRepository($this->mediaClass)
-                      ->find($id);
+                      ->find($this->getId());
 
         if (!$media) {
             throw $this->createNotFoundException(
-                'No media found for id ' . $id
+                'No media found for id ' . $this->getId()
             );
         }
-        $fileContent = $this->filesystem->read($media->getFileName());
-        $response    = new Response($fileContent);
-        $response->headers->set('Content-Type', $this->filesystem->getMimetype($media->getFileName()));
+        $filename = $media->getFileName();
+        $response = null;
+        switch ($this->filesystem->getMimetype($filename)) {
+            case 'application/pdf':
+                $response = $this->pdfContent($filename);
+                break;
+
+            default:
+                $response = $this->defaultContent($filename);
+                break;
+        }
         return $response;
+    }
+
+    public function defaultContent(string $filename): Response
+    {
+        $fileContent = $this->filesystem->read($filename);
+        $response    = new Response($fileContent);
+        $response->headers->set('Content-Type', $this->filesystem->getMimetype($filename));
+        return $response;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDownload(): bool
+    {
+        return $this->download;
+    }
+
+    /**
+     * @param string $filename
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \League\Flysystem\FileNotFoundException
+     */
+    public function pdfContent(string $filename): Response
+    {
+        $fs  = $this->filesystem;
+        $response    = new StreamedResponse(function () use ($fs, $filename) {
+            $outputStream = fopen('php://output', 'wb');
+            $fileStream   = $fs->readStream($filename);
+            stream_copy_to_stream($fileStream, $outputStream);
+        });
+        $disposition = HeaderUtils::makeDisposition(
+            $this->isDownload()?HeaderUtils::DISPOSITION_ATTACHMENT:HeaderUtils::DISPOSITION_INLINE,
+            $filename
+        );
+        $response->headers->set('Content-Type', $this->filesystem->getMimetype($filename));
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set('Content-Size', $this->filesystem->getSize($filename));
+        return $response;
+
+    }
+
+    /**
+     * @param bool $download
+     */
+    public function setDownload(bool $download): void
+    {
+        $this->download = $download;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId(string $id): void
+    {
+        $this->id = $id;
     }
 
     /**

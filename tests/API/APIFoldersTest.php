@@ -27,6 +27,7 @@ namespace App\Tests\API;
 
 use App\Entity\Folder;
 use App\Entity\QuestionChoice;
+use App\Entity\QuestionnairePDFMedia;
 use App\Entity\TplFolder;
 use App\Entity\UserMedia;
 use Ramsey\Uuid\Uuid;
@@ -140,6 +141,12 @@ class APIFoldersTest extends ApiTest
         $this->assertNotEmpty(json_decode($response->getContent()));
         foreach (json_decode($response->getContent(), true) as $result) {
             $this->assertNotEmpty($result);
+            foreach ($result['questionnaires'] as $questionnaire) {
+                // load pdf
+                $pdfId = $this->getIdFromIri($questionnaire['pdf']);
+                $res=$this->doGetSubresourceRequest(QuestionnairePDFMedia::class, $pdfId, 'content');
+            }
+
         }
     }
 }

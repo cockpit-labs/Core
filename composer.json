@@ -7,6 +7,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "api-platform/api-pack": "^1",
+        "cron/cron-bundle": "^2.4",
         "doctrine/annotations": "^1",
         "dragonmantank/cron-expression": "^2.3",
         "easycorp/easyadmin-bundle": "^2.3",
@@ -17,6 +18,7 @@
         "liip/imagine-bundle": "^2.3",
         "mohammad-waleed/keycloak-admin-client": "^0.15.0",
         "oneup/flysystem-bundle": "^3.4",
+        "php-http/guzzle6-adapter": "^2.0",
         "ramsey/uuid": "^3.9",
         "ramsey/uuid-doctrine": "^1.5",
         "sensio/framework-extra-bundle": "^5.5",
@@ -32,9 +34,12 @@
         "symfony/orm-pack": "^1.0",
         "symfony/process": "5.1.*",
         "symfony/security-bundle": "5.1.*",
+        "symfony/twig-pack": "^1.0",
         "symfony/validator": "5.1.*",
         "symfony/workflow": "5.1.*",
         "symfony/yaml": "5.1.*",
+        "thecodingmachine/gotenberg-php-client": "^6.2",
+        "twig/twig": "^2.0",
         "vich/uploader-bundle": "^1.13"
     },
     "require-dev": {

@@ -78,6 +78,7 @@ class Folder
      * @ORM\Id
      * @ORM\Column(type="guid", unique=true)
      * @ORM\GeneratedValue(strategy="UUID")
+     * @Groups({"Submit"})
      * @Groups({"Folder:Read"})
      * @Groups({"Folder:Update"})
      * @Groups({"Score"})
@@ -162,6 +163,7 @@ class Folder
      * @var Collection
      *
      * @ORM\OneToMany(targetEntity="Questionnaire", mappedBy="folder", cascade={"persist"})
+     * @Groups({"Submit"})
      * @Groups({"Folder:Read"})
      * @Groups({"Folder:Create"})
      * @Groups({"Folder:Update"})

@@ -45,6 +45,33 @@ App\Entity\Target:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
+App\Entity\User:
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        parameters:
+          - name: search
+            in: query
+            description: ' String contained in username, first or last name, or email'
+            required: false
+            schema:
+              type: string
+
+  itemOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+  normalizationContext:
+    groups:
+      - 'User:Read'
+      - 'Resource'
+    preserve_empty_objects: true
+
+
+##################################
 #App\Entity\Group:
 #  attributes:
 #

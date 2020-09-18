@@ -34,6 +34,7 @@ use App\Traits\scorableEntity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Evence\Bundle\SoftDeleteableExtensionBundle\Mapping\Annotation as Evence;
 use Gedmo\Blameable\Traits\BlameableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -92,12 +93,27 @@ class Questionnaire
      * @ORM\Column(type="guid", unique=true)
      * @ORM\GeneratedValue(strategy="UUID")
      *
+     * @Groups({"Submit"})
      * @Groups({"Questionnaire:Read"})
      * @Groups({"Folder:Read"})
      * @Groups({"Folder:Update"})
      */
     public $id;
-
+    /**
+     * @var QuestionnairePDFMedia|null
+     *
+     * @ORM\OneToOne(targetEntity="QuestionnairePDFMedia", cascade={"remove"})
+     * @ORM\JoinColumn(name="pdf_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+     *
+     * @Groups({"Submit"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Questionnaire:Update"})
+     *
+     * @ApiProperty(readableLink=false, readable=true)
+     */
+    public $pdf;
     /**
      * @var Folder
      *
@@ -110,7 +126,6 @@ class Questionnaire
      * @ApiProperty(readableLink=false, readable=true)
      */
     private $folder;
-
     /**
      * @var TplQuestionnaire
      *
@@ -125,7 +140,6 @@ class Questionnaire
      * @ApiProperty(readableLink=false, readable=true)
      */
     private $tplQuestionnaire;
-
     /**
      * @var \Doctrine\Common\Collections\Collection
      * @ORM\OneToMany(targetEntity="Block", mappedBy="questionnaire", cascade={"persist"})
@@ -180,6 +194,18 @@ class Questionnaire
         return $this->id;
     }
 
+    public function getPdf(): ?QuestionnairePDFMedia
+    {
+        return $this->pdf;
+    }
+
+    public function setPdf(?QuestionnairePDFMedia $pdf): self
+    {
+        $this->pdf = $pdf;
+
+        return $this;
+    }
+
     public function getTplQuestionnaire(): ?TplQuestionnaire
     {
         return $this->tplQuestionnaire;
@@ -203,4 +229,6 @@ class Questionnaire
 
         return $this;
     }
+
+
 }

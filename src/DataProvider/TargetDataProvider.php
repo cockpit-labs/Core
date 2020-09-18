@@ -70,8 +70,8 @@ final class TargetDataProvider extends KeycloakDataProvider implements Collectio
             return [];
         }
         $right = '';
-        if (!empty($this->request->get('right'))) {
-            $right = $this->request->get('right');
+        if (!empty($this->getRequest()->get('right'))) {
+            $right = $this->getRequest()->get('right');
         }
 
         // extract target role
@@ -86,7 +86,6 @@ final class TargetDataProvider extends KeycloakDataProvider implements Collectio
 //        $queryBuilder->andWhere('p.right IN (:rights)')
 //                     ->setParameter('rights', $rights);
 
-        $sql         = $queryBuilder->getQuery()->getSQL();
         $query       = $queryBuilder->getQuery();
         $targetRoles = array_map(function ($item) {
             return KeycloakConnector::toKeycloakRole($item['role']);
