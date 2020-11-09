@@ -1,5 +1,5 @@
 easy_admin:
   entities:
     TemplateQuestion:
-      class: App\Entity\TplQuestion
+      class: App\Entity\Question\TplQuestion
       label: Questions

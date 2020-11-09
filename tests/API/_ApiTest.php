@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -28,13 +29,15 @@ namespace App\Tests\API;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\CentralAdmin\KeycloakConnector;
 use App\Entity\Calendar;
-use App\Traits\stateableEntity;
-use Faker\Generator;
-use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Signer\Key;
-use Lcobucci\JWT\Signer\Rsa\Sha256;
-use Faker\Factory;
+use App\Entity\Media\MediaTpl;
+use App\Entity\Media\UserMedia;
+use App\Entity\User;
 use App\Service\CCETools;
+use App\Traits\stateableEntity;
+use Faker\Factory;
+use Faker\Generator;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
 define('PDF_MAGIC', "\\x25\\x50\\x44\\x46\\x2D");
 
 /**
@@ -59,7 +62,7 @@ class ApiTest extends ApiTestCase
     private $user          = "kallie.dibbert";
     private $password      = "kallie.dibbert";
     private $kc            = null;
-    private $faker      = null;
+    private $faker         = null;
 
     private $roleView  = [
         "roles" => [
@@ -83,16 +86,6 @@ class ApiTest extends ApiTestCase
 
     private $roles;
     private $userId;
-
-    public function is_pdf($filename): bool
-    {
-        return (file_get_contents($filename, false, null, 0, strlen(PDF_MAGIC)) === PDF_MAGIC) ? true : false;
-    }
-
-    public function doRequest($url, $operation, $options, $file = [])
-    {
-        return $this->getbrowserClient()->request($operation, $url, $options, $file);
-    }
 
     /**
      * @return string
@@ -136,7 +129,7 @@ class ApiTest extends ApiTestCase
         $this->setAdminClient()->setAdminUser();
         $response = $this->doGetRequest($entity);
         $id       = $this->getAnId($entity);
-        if(!empty($id)) {
+        if (!empty($id)) {
             $response = $this->doPatchRequest($entity, $id, $data);
             $this->assertResponseStatusCodeSame(200);
             $this->assertMatchesResourceCollectionJsonSchema(Calendar::class);
@@ -170,6 +163,52 @@ class ApiTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertMatchesResourceCollectionJsonSchema(Calendar::class);
         $this->assertJsonContains($data);
+
+    }
+
+    /**
+     * @return mixed
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    public function addImage($mediaClass = MediaTpl::class, $normalUser = false)
+    {
+        $imageFile = __DIR__ . '/GrumpyBear.png';
+        $this->setViewClient()->setNormalUser();
+        $this->preTest();
+
+//        $response=$this->doGetRequest(Folder::class);
+        $response = $this->doGetRequest(MediaTpl::class);
+
+        $uploadedFile = new UploadedFile(
+            $imageFile,
+            'GrumpyBear.png'
+        );
+
+        if ($mediaClass !== UserMedia::class) {
+            $file = ['foo' => $uploadedFile];
+            $this->doUploadFileRequest($mediaClass, $file);
+            $this->assertResponseStatusCodeSame(403);
+
+            $this->setAdminClient()->setAdminUser();
+        }
+
+        $file = ['foo' => $uploadedFile];
+        $this->doUploadFileRequest($mediaClass, $file);
+        $this->assertResponseStatusCodeSame(400);
+
+        $file     = ['file' => $uploadedFile];
+        $response = $this->doUploadFileRequest($mediaClass, $file);
+        $this->assertResponseStatusCodeSame(201);
+
+        $this->assertMatchesResourceCollectionJsonSchema($mediaClass);
+        $this->assertNotEmpty(json_decode($response->getContent()));
+
+        $imageResponse = json_decode($response->getContent(), true);
+        $imageId       = $imageResponse['id'];
+        return $imageId;
 
     }
 
@@ -243,15 +282,6 @@ class ApiTest extends ApiTestCase
         return $this->doRequest($iri, 'GET', $options, $files);
     }
 
-
-    public function getIdFromIri($iri): string
-    {
-        if(preg_match("/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/", $iri, $matches)){
-            return $matches[0];
-        }
-        return '';
-    }
-
     /**
      * @param $route
      * @param $data
@@ -305,6 +335,11 @@ class ApiTest extends ApiTestCase
         return $this->doRequest($iri, 'POST', $options);
     }
 
+    public function doRequest($url, $operation, $options, $file = [])
+    {
+        return $this->getbrowserClient()->request($operation, $url, $options, $file);
+    }
+
     public function doUploadFileRequest($class, $files)
     {
         $this->preTest();
@@ -343,7 +378,7 @@ class ApiTest extends ApiTestCase
      */
     public function getFaker(): Generator
     {
-        if($this->faker === null){
+        if ($this->faker === null) {
             $this->faker = Factory::create();
         }
         return $this->faker;
@@ -357,13 +392,22 @@ class ApiTest extends ApiTestCase
         return $this->headers;
     }
 
+    public function getIdFromIri($iri): string
+    {
+        if (preg_match("/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/", $iri,
+                       $matches)) {
+            return $matches[0];
+        }
+        return '';
+    }
+
     /**
      * @param String $class
      * @param string $id
      *
      * @return String
      */
-    public function getIri(String $class, $id = ""): String
+    public function getIri(string $class, $id = ""): string
     {
         $iri = static::$container->get('api_platform.iri_converter')->getIriFromResourceClass($class);
         if (($id ?? null) !== null) {
@@ -390,10 +434,10 @@ class ApiTest extends ApiTestCase
     {
         if (empty($this->kc)) {
             $this->kc = new KeycloakConnector(
-                CCETools::param($this->getbrowserClient()->getContainer(),'CCE_KEYCLOAKURL'),
-                CCETools::param($this->getbrowserClient()->getContainer(),'CCE_KEYCLOAKSECRET'),
-                CCETools::param($this->getbrowserClient()->getContainer(),'CCE_coreclient'),
-                CCETools::param($this->getbrowserClient()->getContainer(),'CCE_KEYCLOAKREALM')
+                CCETools::param($this->getbrowserClient()->getContainer(), 'CCE_KEYCLOAKURL'),
+                CCETools::param($this->getbrowserClient()->getContainer(), 'CCE_KEYCLOAKSECRET'),
+                CCETools::param($this->getbrowserClient()->getContainer(), 'CCE_coreclient'),
+                CCETools::param($this->getbrowserClient()->getContainer(), 'CCE_KEYCLOAKREALM')
             );
         }
         return $this->kc;
@@ -405,6 +449,35 @@ class ApiTest extends ApiTestCase
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function getAnUser($name): ?array
+    {
+        // search fior the user.
+        $response = $this->doDirectRequest("GET", "/api/users?search=$name");
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertMatchesResourceCollectionJsonSchema(User::class);
+        $this->assertNotEmpty(json_decode($response->getContent()));
+        $user = json_decode($response->getContent(), true);
+        if (is_array($user)) {
+            $user = $user[rand(0, count($user)-1)];
+        } else {
+            $user = null;
+        }
+        return $user;
+    }
+
+    /**
+     * @param string $user
+     *
+     * @return $this
+     */
+    public function setUser(string $user)
+    {
+        $this->user  = $user;
+        $this->token = null;
+        return $this;
     }
 
     /**
@@ -424,6 +497,11 @@ class ApiTest extends ApiTestCase
     public function setUserId($userId): void
     {
         $this->userId = $userId;
+    }
+
+    public function is_pdf($filename): bool
+    {
+        return (file_get_contents($filename, false, null, 0, strlen(PDF_MAGIC)) === PDF_MAGIC) ? true : false;
     }
 
     public function preTest()
@@ -501,18 +579,6 @@ class ApiTest extends ApiTestCase
     }
 
     /**
-     * @param string $user
-     *
-     * @return $this
-     */
-    public function setUser(string $user)
-    {
-        $this->user  = $user;
-        $this->token = null;
-        return $this;
-    }
-
-    /**
      * @return $this
      */
     public function setViewClient()
@@ -560,4 +626,6 @@ class ApiTest extends ApiTestCase
         $this->doGetRequest(Calendar::class, [], $headers);
         $this->assertResponseStatusCodeSame(401);
     }
+
+
 }

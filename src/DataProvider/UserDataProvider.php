@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -28,15 +29,15 @@ namespace App\DataProvider;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
-use App\CentralAdmin\KeycloakConnector;
 use App\Entity\User;
 use Generator;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
 /**
  * Class UserDataProvider
  */
-final class UserDataProvider extends KeycloakDataProvider implements CollectionDataProviderInterface, ItemDataProviderInterface, RestrictedDataProviderInterface
+final class UserDataProvider extends CommonDataProvider implements CollectionDataProviderInterface, ItemDataProviderInterface, RestrictedDataProviderInterface
 {
 
     /**
@@ -54,13 +55,8 @@ final class UserDataProvider extends KeycloakDataProvider implements CollectionD
 
         $kcUsers = $this->getKeycloakConnector()->getUsers($searchstring);
         foreach ($kcUsers as $kcuser) {
-            $kcuserObject = (object)$kcuser;
             $user         = new User();
-            $user->setId($kcuserObject->id);
-            $user->setUsername($kcuserObject->username);
-            $user->setFirstname($kcuserObject->firstName);
-            $user->setLastname($kcuserObject->lastName);
-            $user->setEmail($kcuserObject->email);
+            $user->populateUser($kcuser);
             yield $user;
         }
         return [];
@@ -68,25 +64,19 @@ final class UserDataProvider extends KeycloakDataProvider implements CollectionD
 
     public function getItem(string $resourceClass, $id, string $operationName = null, array $context = []): ?User
     {
-        $item = null;
+        $user = null;
         // retrieve user OR group
-
         if (!Uuid::isValid($id)) {
-            // maybe it's a name
-            $id   = KeycloakConnector::toKeycloakUser($id);
-            $data = $this->getKeycloakConnector()->getUserByName($id);
-        } else {
-            $data = $this->getKeycloakConnector()->getUserById($id);
+            throw new UnexpectedValueException("bad id", 404);
         }
+        $kcUser = $this->getKeycloakConnector()->getUser($id);
 
 
-        if (!empty($data)) {
-            $item = new User();
-            $item->setId($data['id']);
-            $item->setName($data['name']);
+        if (!empty($kcUser)) {
+            $user         = new User();
+            $user->populateUser($kcUser);
         }
-
-        return $item;
+        return $user;
     }
 
     /**

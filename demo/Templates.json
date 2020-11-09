@@ -43,12 +43,15 @@
     ]
   },
   {
-    "TplBlock": [
+    "Block\\BlockTpl": [
       {
         "id": "block1",
-        "tplQuestions": [
+        "label": "Bloc numéro un",
+        "description": "Ceci est la description du bloc numéro un.",
+        "questionTpls": [
           {
             "alias": "none",
+            "position": 1,
             "weight": 0,
             "readRenderer": null,
             "writeRenderer": {
@@ -56,7 +59,6 @@
             },
             "validator": {
             },
-            "position": 1,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
@@ -66,12 +68,80 @@
             "category": null,
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question sans réponse ni commentaire ni photo.",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value === null"
+                },
+                "label": "Question affichée systématiquement car le parent n'a pas de réponse possible",
+                "description": null
+              }
+            ]
+          },
+          {
+            "alias": "none",
+            "position": 1,
+            "weight": 0,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "photo"
+            },
+            "validator": {
+            },
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 0,
+            "hasComment": false,
+            "maxPhotos": 2,
+            "category": null,
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "question photo",
+            "description": null,
+            "children": []
           },
           {
             "alias": "text",
+            "position": 2,
             "weight": 1,
             "readRenderer": null,
             "writeRenderer": {
@@ -79,32 +149,162 @@
             },
             "validator": {
             },
-            "position": 2,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
             "maxChoices": 1,
-            "hasComment": false,
+            "hasComment": true,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
-                ",document": null,
+                "document": null,
                 "valueFormula": {
+                  "expression": "value"
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question texte avec commentaire sans photo.",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value !== null"
+                },
+                "label": "Question affichée lorsque l'utilisateur a saisi du texte",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value === null"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas saisi de texte",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "rawValue == 'test'"
+                },
+                "label": "Question affichée lorsque l'utilisateur a saisi le texte 'test'",
+                "description": null
+              }
+            ]
           },
           {
             "alias": "select",
+            "position": 3,
             "weight": 1,
             "readRenderer": null,
             "writeRenderer": {
@@ -114,7 +314,6 @@
             },
             "validator": {
             },
-            "position": 3,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 1,
@@ -122,40 +321,173 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
-                "document": null,
                 "valueFormula": {
+                  "expression": "1"
                 },
-                "resource": "QuestionChoice",
-                "locale": null,
                 "label": "Choix 1"
               },
               {
                 "document": null,
                 "valueFormula": {
+                  "expression": "2"
                 },
-                "resource": "QuestionChoice",
+                "position": 2,
                 "locale": null,
                 "label": "Choix 2"
               },
               {
                 "document": null,
                 "valueFormula": {
+                  "expression": "3"
                 },
-                "resource": "QuestionChoice",
+                "position": 3,
                 "locale": null,
                 "label": "Choix 3"
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question select non-obligatoire mais avec au minimum 1 réponse, max 2.",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value == 2"
+                },
+                "label": "Question affichée lorsque l'utilisateur répondu 'Choix 2'",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "1"
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "0"
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 2"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi 2 réponses",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas choisi de réponse",
+                "description": null
+              }
+            ]
           },
           {
             "alias": "yesno",
+            "position": 4,
             "weight": 55,
             "readRenderer": null,
             "writeRenderer": {
@@ -164,7 +496,6 @@
             },
             "validator": {
             },
-            "position": 4,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
@@ -172,20 +503,22 @@
             "hasComment": true,
             "maxPhotos": 3,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
+                  "expression": "1"
                 },
-                "resource": "QuestionChoice",
+                "position": 1,
                 "locale": null,
                 "label": "yes"
               },
               {
                 "document": null,
                 "valueFormula": {
+                  "expression": "0"
                 },
-                "resource": "QuestionChoice",
+                "position": 2,
                 "locale": null,
                 "label": "no"
               }
@@ -193,44 +526,144 @@
             "defaultChoice": null,
             "children": [
               {
-                "alias": "text",
-                "weight": 80,
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
                 "readRenderer": null,
                 "writeRenderer": {
-                  "component": "text"
+                  "component": "select",
+                  "display": "button"
                 },
-                "position": 1,
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": true,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "1"
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "0"
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value == 1"
+                },
+                "label": "Question affichée lorsque l'utilisateur a sélectionné OUI",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
                 "hiddenLabel": false,
                 "mandatory": false,
                 "minChoices": 0,
                 "maxChoices": 1,
-                "hasComment": false,
-                "maxPhotos": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
                 "category": null,
-                "choices": [
+                "choiceTpls": [
                   {
                     "document": null,
                     "valueFormula": {
                     },
-                    "resource": "QuestionChoice",
+                    "position": 1,
                     "locale": null,
-                    "label": ""
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
                   }
                 ],
                 "defaultChoice": null,
-                "trigger": null,
-                "resource": "TplQuestion",
-                "label": "ceci est ma question texte liée avec max 1 photo.",
+                "trigger": {
+                  "expression": "value == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur a sélectionné NON",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas sélectionné de réponse",
                 "description": null
               }
             ],
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question oui / non.",
             "description": null
           },
           {
             "alias": "number",
+            "position": 5,
             "weight": 1,
             "readRenderer": null,
             "writeRenderer": {
@@ -241,7 +674,6 @@
             },
             "validator": {
             },
-            "position": 5,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
@@ -249,25 +681,155 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
-                  "expression": "$value*1000"
+                  "expression": "value*1000"
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question nombre entre 0 et 99 avec un pas de 2",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": true,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count > 1"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi un chiffre",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas choisi de chiffre",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value in 5000..10000"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi un chiffre entre 5 et 10",
+                "description": null
+              }
+            ]
           },
           {
             "alias": "range",
+            "position": 6,
             "weight": 1,
             "readRenderer": null,
             "writeRenderer": {
@@ -278,7 +840,6 @@
             },
             "validator": {
             },
-            "position": 6,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
@@ -286,25 +847,155 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
-                  "expression": "$value*1000"
+                  "expression": "value"
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question slider entre -10 et 10 avec un pas de 0,5",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": true,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas choisi de valeur",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value == 5"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi la valeur 5",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "value in 2..3 || value in 7..10"
+                },
+                "label": "Question affichée lorsque l'utilisateur a une valeur entre 2 et 3 ou entre 7 et 10",
+                "description": null
+              }
+            ]
           },
           {
             "alias": "dateTime",
+            "position": 7,
             "weight": 1,
             "readRenderer": null,
             "writeRenderer": {
@@ -314,7 +1005,6 @@
             },
             "validator": {
             },
-            "position": 7,
             "hiddenLabel": false,
             "mandatory": false,
             "minChoices": 0,
@@ -322,114 +1012,241 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question date avec jour et heure/minutes",
-            "description": null
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "position": 1,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": true,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": false,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 0"
+                },
+                "label": "Question affichée lorsque l'utilisateur n'a pas choisi de date",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 2,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "count == 1"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi une date",
+                "description": null
+              },
+              {
+                "alias": "yesno",
+                "position": 3,
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 3,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "1"
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                      "expression": "0"
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": "rawValue matches '/2021/'"
+                },
+                "label": "Question affichée lorsque l'utilisateur a choisi une date de l'année 2021",
+                "description": null,
+                "children": [
+                  {
+                    "alias": "none",
+                    "position": 1,
+                    "weight": 0,
+                    "readRenderer": null,
+                    "writeRenderer": {
+                      "component": "none"
+                    },
+                    "validator": {
+                    },
+                    "hiddenLabel": false,
+                    "mandatory": false,
+                    "minChoices": 0,
+                    "maxChoices": 0,
+                    "hasComment": false,
+                    "maxPhotos": 0,
+                    "category": null,
+                    "defaultChoice": null,
+                    "trigger": {
+                      "expression": "value == 1"
+                    },
+                    "label": "Question affichée lorsque l'utilisateur a choisi une date de l'année 2021 et répondu oui à la question",
+                    "description": null
+                  }
+                ]
+              }
+            ]
           }
-        ],
-        "resource": "TplBlock",
-        "label": "Bloc numéro un",
-        "description": "Ceci est la description du bloc numéro un."
+        ]
       },
       {
         "id": "block2",
-        "resource": "TplBlock",
         "label": "Bloc numéro deux",
         "description": "Ceci est la description du bloc numéro deux."
       }
     ]
   },
   {
-    "TplQuestionnaire": [
+    "Questionnaire\\QuestionnaireTpl": [
       {
         "id": "TplQuestionnaire1",
-        "resource": "TplQuestionnaire",
         "label": "Questionnaire numéro un",
-        "description": "Ceci est la description du questionnaire numéro un."
+        "description": "Ceci est la description du questionnaire numéro un.",
+        "blockTpls": [
+          "localid:block1",
+          "localid:block2"
+        ]
       },
       {
         "id": "TplQuestionnaire2",
-        "tplQuestionnaireBlocks": [
-          {
-            "position": 1,
-            "tplBlock": "localid:block2"
-          }
-        ],
-        "resource": "TplQuestionnaire",
         "label": "Questionnaire numéro deux",
-        "description": "Ceci est la description du questionnaire numéro deux."
+        "description": "Ceci est la description du questionnaire numéro deux.",
+        "blockTpls": [
+          "localid:block1"
+        ]
       }
     ]
   },
   {
-    "TplQuestionnaireBlock": [
-      {
-        "position": 0,
-        "tplQuestionnaire": "localid:TplQuestionnaire1",
-        "tplBlock": "localid:block1"
-      },
-      {
-        "position": 1,
-        "tplQuestionnaire": "localid:TplQuestionnaire1",
-        "tplBlock": "localid:block2"
-      },
-      {
-        "position": 0,
-        "tplQuestionnaire": "localid:TplQuestionnaire2",
-        "tplBlock": "localid:block2"
-      }
-    ]
-  },
-  {
-    "TplFolder": [
+    "Folder\\FolderTpl": [
       {
         "id": "TemplateFolder1",
         "folderTargets": [
           {
-            "role": "CCEStore",
-            "resource": "TplFolderTarget"
+            "role": "CCEStore"
           }
         ],
         "permissions": [
           {
             "right": "CREATE",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "SUBMIT",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           },
           {
             "right": "STATS",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           }
         ],
-        "tplQuestionnaires": [
+        "questionnaireTpls": [
           "localid:TplQuestionnaire1",
           "localid:TplQuestionnaire2"
         ],
@@ -447,38 +1264,32 @@
         "id": "TemplateFolder2",
         "folderTargets": [
           {
-            "role": "CCEStore",
-            "resource": "TplFolderTarget"
+            "role": "CCEStore"
           }
         ],
         "permissions": [
           {
             "right": "CREATE",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "SUBMIT",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           },
           {
             "right": "STATS",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           }
         ],
-        "tplQuestionnaires": [
+        "questionnaireTpls": [
           "localid:TplQuestionnaire1",
           "localid:TplQuestionnaire2"
         ],

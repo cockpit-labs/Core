@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -34,33 +35,62 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 class CCETools
 {
-    public static function filename($param, $name, $default = '')
+    /**
+     * @param        $param
+     * @param        $name
+     * @param string $default
+     *
+     * @return string
+     */
+    public static function filename($param, $name, $default = ''): string
     {
         $result = $default;
         if (is_a($param, Container::class)) {
             $param = $param->getParameterBag();
         }
-        if (is_a($param, Parameter::class)
-            || is_a($param, ParameterBag::class)
-            || is_a($param, FrozenParameterBag::class)
-            || is_a($param, ContainerBag::class)
+        if ((is_a($param, Parameter::class)
+                || is_a($param, ParameterBag::class)
+                || is_a($param, FrozenParameterBag::class)
+                || is_a($param, ContainerBag::class))
             && $param->has($name)) {
-            $result = file_exists($param->get($name)) ? $param->get($name) : $default;
+            $default = $default ?: $param->get($name);
+            $result  = file_exists($param->get($name)) ? $param->get($name) : $default;
         }
 
         return $result;
     }
 
+    /**
+     * @param $iri
+     *
+     * @return string
+     */
+    public static function getIdFromIri($iri): string
+    {
+        if (preg_match("/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/", $iri,
+                       $matches)) {
+            return $matches[0];
+        }
+        return '';
+    }
+
+    /**
+     * @param        $param
+     * @param        $name
+     * @param string $default
+     *
+     * @return false|mixed|string
+     */
     public static function param($param, $name, $default = '')
     {
         $result = $default;
         if (is_a($param, Container::class)) {
             $param = $param->getParameterBag();
         }
-        if (is_a($param, Parameter::class)
-            || is_a($param, ParameterBag::class)
-            || is_a($param, FrozenParameterBag::class)
-            || is_a($param, ContainerBag::class)
+        if ((is_a($param, Parameter::class)
+                || is_a($param, ParameterBag::class)
+                || is_a($param, FrozenParameterBag::class)
+                || is_a($param, ContainerBag::class))
             && $param->has($name)) {
             $result = file_exists($param->get($name)) ? file_get_contents($param->get($name)) : $param->get($name);
             if (empty($result)) {
@@ -70,4 +100,6 @@ class CCETools
 
         return $result;
     }
+
+
 }

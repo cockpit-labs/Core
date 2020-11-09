@@ -1,6 +1,6 @@
---- vendor/api-platform/core/src/Bridge/Symfony/Bundle/Test/Client.php	(date 1583264432711)
-+++ vendor/api-platform/core/src/Bridge/Symfony/Bundle/Test/Client.php	(date 1583264432711)
-@@ -84,7 +84,7 @@
+--- vendor/api-platform/core/src/Bridge/Symfony/Bundle/Test/Client.php	(date 1601358757198)
++++ vendor/api-platform/core/src/Bridge/Symfony/Bundle/Test/Client.php	(date 1601358757198)
+@@ -87,7 +87,7 @@
       *
       * @return Response
       */
@@ -9,7 +9,7 @@
      {
          $basic = $options['auth_basic'] ?? null;
          [$url, $options] = self::prepareRequest($method, $url, $options, $this->defaultOptions);
-@@ -121,7 +121,7 @@
+@@ -124,7 +124,7 @@
              'url' => $resolvedUrl,
              'primary_port' => 'http:' === $url['scheme'] ? 80 : 443,
          ];

@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -25,10 +26,10 @@
 
 namespace App\CentralAdmin;
 
-use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Class KeycloakConnector
@@ -47,7 +48,7 @@ class KeycloakConnector
     private const ATTRIBUTE_HIDDEN = "hidden";
     private const ATTRIBUTES       = "attributes";
 
-    private const BEARER = "Bearer ";
+    private const BEARER  = "Bearer ";
     private const BASEURL = "/auth/admin/realms/";
     /**
      * @var array
@@ -405,13 +406,20 @@ class KeycloakConnector
      */
     public function getUser(string $id): array
     {
+        $user = [];
         if ($this->isValidId($id)) {
-            $user = $this->callAdminAPI('users', 'GET', $id, 'members');
+            $user = $this->callAdminAPI('users', 'GET', $id);
             if (!empty($user)) {
                 $user['type'] = 'USER';
             }
+        } else {
+            // maybe it's a username
+            $users = $this->getUsers($id);
+            if (!empty($users)) {
+                $user = $users[0];
+            }
         }
-        return [];
+        return $user;
     }
 
     /**
@@ -559,7 +567,7 @@ class KeycloakConnector
                 $formParams
             );
         } catch (ClientException $e) {
-            throw new Exception($e->getMessage());
+            throw new UnauthorizedHttpException($e->getMessage());
         }
 
         $body        = json_decode($response->getBody());
@@ -615,5 +623,22 @@ class KeycloakConnector
             $name = $prefix . $name;
         }
         return $name;
+    }
+
+    public function userExists($id): bool
+    {
+        if ($this->isValidId($id)) {
+            return !empty($this->getUser($id));
+        } else {
+            return !empty($this->getUserId($id));
+        }
+    }
+
+    public function groupExists($id): bool
+    {
+        if ($this->isValidId($id)) {
+            return !empty($this->getGroup());
+        }
+        return false;
     }
 }

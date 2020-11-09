@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -49,14 +50,27 @@ class User
      * @ApiProperty(identifier=true)
      *
      * @var string | null
-     * @Groups({"TplFolder:Read"})
      * @Groups({"User:Read"})
+     * @Groups({"FolderTpl:Read"})
+     * @Groups({"FolderTpl:Update"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      */
     public $id;
 
     /**
      * @var string
      * @Groups({"User:Read"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      *
      */
     public $username;
@@ -64,6 +78,12 @@ class User
     /**
      * @var string
      * @Groups({"User:Read"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      *
      */
     public $firstname;
@@ -71,6 +91,12 @@ class User
     /**
      * @var string
      * @Groups({"User:Read"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      *
      */
     public $lastname;
@@ -78,6 +104,12 @@ class User
     /**
      * @var string
      * @Groups({"User:Read"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      *
      */
     public $email;
@@ -85,8 +117,14 @@ class User
     /**
      * @var string
      *
-     * @Groups({"TplFolder:Read"})
-     * @Groups({"TplFolderTarget:Read"})
+     * @Groups({"FolderTpl:Read"})
+     * @Groups({"FolderTplTarget:Read"})
+     * @Groups({"Folder:Read"})
+     * @Groups({"Folder:Update"})
+     * @Groups({"Questionnaire:Update"})
+     * @Groups({"Questionnaire:Read"})
+     * @Groups({"Task:Read"})
+     * @Groups({"Task:Update"})
      */
     public $uuid;
 
@@ -158,6 +196,11 @@ class User
         return $this->lastname;
     }
 
+    /**
+     * @param string|null $lastname
+     *
+     * @return $this
+     */
     public function setLastname(?string $lastname): self
     {
         $this->lastname = $lastname;
@@ -165,11 +208,19 @@ class User
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getUsername(): ?string
     {
         return $this->username;
     }
 
+    /**
+     * @param string|null $username
+     *
+     * @return $this
+     */
     public function setUsername(?string $username): self
     {
         $this->username = $username;
@@ -177,15 +228,39 @@ class User
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
+    /**
+     * @param string|null $uuid
+     *
+     * @return $this
+     */
     public function setUuid(?string $uuid): self
     {
         $this->uuid = $uuid;
 
         return $this;
     }
+
+    /**
+     * @param array $user
+     */
+    public function populateUser(array $user)
+    {
+        $user = array_change_key_case($user);
+        $this->setId($user['id']);
+        $this->setUuid($user['id']);
+        $this->setUsername($user['username']);
+        $this->setFirstname($user['firstname']);
+        $this->setLastname($user['lastname']);
+        $this->setEmail($user['email']);
+    }
+
+
 }

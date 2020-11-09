@@ -4,3 +4,7 @@
 authentication_token:
   path: /authentication_token
   methods: ['POST']
+
+homepage:
+  path: /
+  controller: App\Controller\HomeController::home

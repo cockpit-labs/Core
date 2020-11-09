@@ -34,10 +34,10 @@
     ]
   },
   {
-    "TplBlock": [
+    "Block\\BlockTpl": [
       {
         "id": "block1",
-        "tplQuestions": [
+        "questionTpls": [
           {
             "alias": "none",
             "weight": 0,
@@ -57,7 +57,6 @@
             "category": null,
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question sans réponse ni commentaire ni photo.",
             "description": null
           },
@@ -78,19 +77,17 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 ",document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question texte avec commentaire sans photo.",
             "description": null
           },
@@ -113,12 +110,12 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
+                "position": 1,
                 "locale": null,
                 "label": "Choix 1"
               },
@@ -126,7 +123,7 @@
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
+                "position": 2,
                 "locale": null,
                 "label": "Choix 2"
               },
@@ -134,14 +131,13 @@
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
+                "position": 3,
                 "locale": null,
                 "label": "Choix 3"
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question select non-obligatoire mais avec au minimum 1 réponse, max 2.",
             "description": null
           },
@@ -163,12 +159,12 @@
             "hasComment": true,
             "maxPhotos": 3,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
+                "position": 1,
                 "locale": null,
                 "label": "yes"
               },
@@ -176,7 +172,7 @@
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
+                "position": 2,
                 "locale": null,
                 "label": "no"
               }
@@ -198,25 +194,22 @@
                 "hasComment": false,
                 "maxPhotos": 1,
                 "category": null,
-                "choices": [
+                "choiceTpls": [
                   {
                     "document": null,
                     "valueFormula": {
                     },
-                    "resource": "QuestionChoice",
                     "locale": null,
                     "label": ""
                   }
                 ],
                 "defaultChoice": null,
                 "trigger": null,
-                "resource": "TplQuestion",
                 "label": "ceci est ma question texte liée avec max 1 photo.",
                 "description": null
               }
             ],
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question oui / non.",
             "description": null
           },
@@ -240,20 +233,18 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
-                  "expression": "$value*1000"
+                  "expression": "value*1000"
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question nombre entre 0 et 99 avec un pas de 2",
             "description": null
           },
@@ -277,20 +268,18 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
-                  "expression": "$value*1000"
+                  "expression": "value*1000"
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question slider entre -10 et 10 avec un pas de 0,5",
             "description": null
           },
@@ -313,109 +302,76 @@
             "hasComment": false,
             "maxPhotos": 0,
             "category": null,
-            "choices": [
+            "choiceTpls": [
               {
                 "document": null,
                 "valueFormula": {
                 },
-                "resource": "QuestionChoice",
                 "locale": null,
                 "label": ""
               }
             ],
             "defaultChoice": null,
             "trigger": null,
-            "resource": "TplQuestion",
             "label": "ceci est ma question date avec jour et heure/minutes",
             "description": null
           }
         ],
-        "resource": "TplBlock",
         "label": "Bloc numéro un",
         "description": "Ceci est la description du bloc numéro un."
       },
       {
         "id": "block2",
-        "resource": "TplBlock",
         "label": "Bloc numéro deux",
         "description": "Ceci est la description du bloc numéro deux."
       }
     ]
   },
   {
-    "TplQuestionnaire": [
+    "Questionnaire\\QuestionnaireTpl": [
       {
         "id": "TplQuestionnaire1",
-        "resource": "TplQuestionnaire",
         "label": "Questionnaire numéro un",
-        "description": "Ceci est la description du questionnaire numéro un."
+        "description": "Ceci est la description du questionnaire numéro un.",
+        "blockTpls": ["localid:block1","localid:block2"]
+
       },
       {
         "id": "TplQuestionnaire2",
-        "tplQuestionnaireBlocks": [
-          {
-            "position": 1,
-            "tplBlock": "localid:block2"
-          }
-        ],
-        "resource": "TplQuestionnaire",
         "label": "Questionnaire numéro deux",
-        "description": "Ceci est la description du questionnaire numéro deux."
+        "description": "Ceci est la description du questionnaire numéro deux.",
+        "blockTpls": ["localid:block1"]
       }
     ]
   },
   {
-    "TplQuestionnaireBlock": [
-      {
-        "position": 0,
-        "tplQuestionnaire": "localid:TplQuestionnaire1",
-        "tplBlock": "localid:block1"
-      },
-      {
-        "position": 1,
-        "tplQuestionnaire": "localid:TplQuestionnaire1",
-        "tplBlock": "localid:block2"
-      },
-      {
-        "position": 0,
-        "tplQuestionnaire": "localid:TplQuestionnaire2",
-        "tplBlock": "localid:block2"
-      }
-    ]
-  },
-  {
-    "TplFolder": [
+    "Folder\\FolderTpl": [
       {
         "id": "TemplateFolder1",
         "folderTargets": [
           {
-            "role": "CCEStore",
-            "resource": "TplFolderTarget"
+            "role": "CCEStore"
           }
         ],
         "permissions": [
           {
             "right": "CREATE",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "SUBMIT",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           }
         ],
-        "tplQuestionnaires": [
+        "questionnaireTpls": [
           "localid:TplQuestionnaire1",
           "localid:TplQuestionnaire2"
         ],
@@ -432,38 +388,32 @@
         "id": "TemplateFolder2",
         "folderTargets": [
           {
-            "role": "CCEStore",
-            "resource": "TplFolderTarget"
+            "role": "CCEStore"
           }
         ],
         "permissions": [
           {
             "right": "CREATE",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "SUBMIT",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCEStoreManager",
-            "resource": "FolderPermission"
+            "role": "CCEStoreManager"
           },
           {
             "right": "VIEW",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           },
           {
             "right": "STATS",
-            "role": "CCECountryManager",
-            "resource": "FolderPermission"
+            "role": "CCECountryManager"
           }
         ],
-        "tplQuestionnaires": [
+        "questionnaireTpls": [
           "localid:TplQuestionnaire1",
           "localid:TplQuestionnaire2"
         ],

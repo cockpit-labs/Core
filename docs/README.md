@@ -15,16 +15,13 @@ All environment variables are set in [.env](../.env) file in `Core` directory :
 | key         | value                  |
 | :---------- | :--------------------- |
 | `DATABASE_URL`| the database URL  ([doctrine format](https://www.doctrine-project.org/projects/doctrine-dbal/en/2.10/reference/configuration.html#connecting-using-a-url)) |
-| `KEYCLOAKURL`| the keycloak URL. ie `https://keycloak.cockpitlabs.io`. It's often use with port 8080 ([check docker keycloak documentation](https://hub.docker.com/r/jboss/keycloak/)) 
-| `KEYCLOAKAUTHURL`| the keycloak authentication URL. ie `https://keycloak.cockpitlabs.io/auth`
-| `KEYCLOAKSECRET`| the file containing the cockpitcore client secret in Keycloak ![API Cockpit CE](images/cockpitcore-secret.png)
+| `KEYCLOAKURL`| the keycloak URL. ie `https://keycloak.cockpitlabs.io`. It's often use with port 8080 ([check docker keycloak documentation](https://hub.docker.com/r/jboss/keycloak/)). Used by Core 
 
 ### Core
 | key         | value                  |
 | :---------- | :--------------------- |
-| `APISERVER`| the host name where `Core` is installed 
-| GOTENBERGURL |  http://localhost:3000
-| `JWT_PASSPHRASEFILE`| file containing the cockpitcore client secret
+| `GOTENBERGURL` |  http://localhost:3000
+| ` BASEURL` | This is the base URL for clients. ie: `http://cockpitce.cockpitlabs.io/`
 | `JWT_SECRET_KEY`and `JWT_PUBLIC_KEY`| file containing keys found in Keycloak realm. This is `public key`and `certificate` buttons on the right. ![API Cockpit CE](images/publickey-certificate.png)
 
 In the default `.env`file, key files are located in `Core` directory. This is not secure. In production, move them in safe places.

@@ -1,5 +1,5 @@
 ##################################
-App\Entity\MediaOwner:
+App\Entity\Media\MediaOwner:
   attributes:
     denormalization_context:
       groups:
@@ -31,7 +31,7 @@ App\Entity\MediaOwner:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\UserMedia:
+App\Entity\Media\UserMedia:
   attributes:
     denormalization_context:
       groups:
@@ -84,7 +84,7 @@ App\Entity\UserMedia:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\TplMedia:
+App\Entity\Media\MediaTpl:
   attributes:
     denormalization_context:
       groups:
@@ -101,7 +101,7 @@ App\Entity\TplMedia:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
     postfile:
-      controller: App\Controller\CreateTplMediaAction
+      controller: App\Controller\CreateMediaTplAction
       deserialize: false
       method: POST
       openapi_context:
@@ -127,14 +127,14 @@ App\Entity\TplMedia:
     getcontent:
       controller: App\Controller\GetUserMediaContentAction
       method: GET
-      path: '/tpl_media/{id}/content'
+      path: '/media_tpl/{id}/content'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
     patch:
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
 ##################################
-App\Entity\QuestionnairePDFMedia:
+App\Entity\Media\QuestionnairePDFMedia:
   attributes:
     denormalization_context:
       groups:

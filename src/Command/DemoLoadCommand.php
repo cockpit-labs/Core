@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -27,16 +28,16 @@ namespace App\Command;
 
 use ApiPlatform\Core\Api\IriConverterInterface;
 use App\CentralAdmin\KeycloakConnector;
-use App\Entity\Folder;
+use App\Entity\Folder\Folder;
+use App\Entity\Folder\FolderTpl;
+use App\Entity\Media\UserMedia;
 use App\Entity\Target;
-use App\Entity\TplFolder;
 use App\Service\CCETools;
 use Doctrine\ORM\EntityManagerInterface;
 use Faker\Factory;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use Keycloak\Admin\KeycloakClient;
 use League\Flysystem\FilesystemInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -45,24 +46,28 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 
 class DemoLoadCommand extends Command
 {
     // the name of the command (the part after "bin/console")
-    protected static $defaultName       = 'demo:load';
-    public           $browserClient     = null;
-    private          $kc_realm          = "cockpit-ce";
-    private          $kc_admin          = "admin";
-    private          $kc_adminpwd       = '';
-    private          $publicKeyFile     = "/data/appdatace/public/key.pub";
-    private          $privateKeyFile    = "/data/appdatace/private/key";
-    private          $privatesecretFile = "/data/appdatace/private/cockpitcore.secret";
-    private          $adminUser         = "audie.fritsch";
-    private          $adminPwd          = "audie.fritsch";
-    private          $normalUser        = [
+    protected static $defaultName    = 'demo:load';
+    public           $browserClient  = null;
+    private          $kc_admin       = "admin";
+    private          $kc_adminpwd    = '';
+    private          $publicKeyFile  = "/data/appdatace/public/key.pub";
+    private          $privateKeyFile = "/data/appdatace/private/key";
+    private          $adminUser      = "audie.fritsch";
+    private          $adminPwd       = "audie.fritsch";
+
+    private $time_start = 0;
+    /**
+     * @var string[]
+     */
+    private $normalUser = [
         "kallie.dibbert",
         "garfield.mayert",
         "queenie.jacobi",
@@ -74,35 +79,74 @@ class DemoLoadCommand extends Command
         "tiara.goyette",
         "zoie.goldner"
     ];
-    private          $normalUserTests   = [
+    /**
+     * @var string[]
+     */
+    private $normalUserTests = [
         "kallie.dibbert",
         "zoie.goldner"
     ];
-    private          $normalPwd         = [];
-    private          $iriConverter      = null; // Store Manager for Store-22
-    private          $token             = '';
-    private          $options           = [];
-    private          $headers           = [];
-    private          $cockpitClient     = 'cockpitview'; // normal user. Not admin
-    private          $user              = "";
-    private          $password          = "";
-    private          $kc                = null;
+    private $normalPwd       = [];
+    /**
+     * @var \ApiPlatform\Core\Api\IriConverterInterface
+     */
+    private $iriConverter = null; // Store Manager for Store-22
+    /**
+     * @var string
+     */
+    private $token = '';
+    /**
+     * @var array
+     */
+    private $options = [];
+    /**
+     * @var array
+     */
+    private $headers = [];
+    /**
+     * @var string
+     */
+    private $cockpitClient = 'cockpitview'; // normal user. Not admin
+    /**
+     * @var string
+     */
+    private $user = "";
+    /**
+     * @var string
+     */
+    private $password = "";
+    /**
+     * @var null
+     */
+    private $kc = null;
 
     /**
      * @var \League\Flysystem\FilesystemInterface
      */
     private $mediaFilesystem;
 
+    /**
+     * @var string
+     */
     private $fakedate = '';
 
+    /**
+     * @var \Symfony\Component\HttpKernel\KernelInterface
+     */
     private $kernel = null;
 
-    private $roleView  = [
+    /**
+     * @var \string[][]
+     */
+    private $roleView = [
         "roles" => [
             "CCEDashboard",
             "CCEUser",
         ]
     ];
+    /**
+     * @var \string[][]
+     */
     private $roleAdmin = [
         "roles" => [
             "CCEDashboard",
@@ -117,36 +161,139 @@ class DemoLoadCommand extends Command
     private $input;
     private $output;
 
+    /**
+     * @var \Doctrine\ORM\EntityManagerInterface
+     */
     private $entityManager = null;
 
-    private $idMapping = [];
+    /**
+     * @var \App\Command\LoggerInterface
+     */
+    private $logger;
 
+    /**
+     * @var array
+     */
+    private $idMapping = [];
+    /**
+     * @var string
+     */
+    private $baseUrl;
+    /**
+     * @var false|mixed|string
+     */
+    private $coreUrl;
+    /**
+     * @var false|mixed|string
+     */
+    private $kcUrl;
+    /**
+     * @var false|mixed|string
+     */
+    private $kcSecret;
+    /**
+     * @var false|mixed|string
+     */
+    private $kcCoreClient;
+    /**
+     * @var false|mixed|string
+     */
+    private $kcRealm;
+    /**
+     * @var float|int
+     */
+    private $tokenDelayMultiplier;
+    /**
+     * @var false|mixed|string
+     */
+    private $kcSmtpServer;
+    /**
+     * @var bool
+     */
+    private $simpleimage;
+
+
+    /**
+     * DemoLoadCommand constructor.
+     *
+     * @param \Symfony\Component\HttpKernel\KernelInterface                             $kernel
+     * @param \ApiPlatform\Core\Api\IriConverterInterface                               $iriService
+     * @param \Doctrine\ORM\EntityManagerInterface                                      $entityManager
+     * @param \Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface $params
+     * @param \League\Flysystem\FilesystemInterface                                     $acmeFilesystem
+     */
     public function __construct(
         KernelInterface $kernel,
         IriConverterInterface $iriService,
         EntityManagerInterface $entityManager,
         ParameterBagInterface $params,
-        FilesystemInterface $acmeFilesystem
+        FilesystemInterface $acmeFilesystem,
+        LoggerInterface $applogger
     ) {
+        $this->logger          = $applogger;
         $this->entityManager   = $entityManager;
         $this->iriConverter    = $iriService;
         $this->kernel          = $kernel;
         $this->params          = $params;
         $this->mediaFilesystem = $acmeFilesystem;
         $this->normalPwd       = $this->normalUser;
+
+        $this->publicKeyFile  = CCETools::filename($this->params, 'JWT_PUBLIC_KEY');
+        $this->privateKeyFile = CCETools::filename($this->params, 'JWT_SECRET_KEY');
+
+        $hostname           = gethostbyaddr(gethostbyname(gethostname()));
+        $this->baseUrl      = CCETools::param($this->params, 'CCE_BASEURL', 'https://cockpitce.' . $hostname);
+        $this->coreUrl      = CCETools::param($this->params, 'CCE_APIURL', $this->baseUrl . '/core');
+        $this->kcUrl        = CCETools::param($this->params, 'CCE_KEYCLOAKURL');
+        $this->kcSecret     = CCETools::param($this->params, 'CCE_KEYCLOAKSECRET');
+        $this->kcCoreClient = CCETools::param($this->params, 'CCE_coreclient');
+        $this->kcRealm      = CCETools::param($this->params, 'CCE_KEYCLOAKREALM');
+        $smtpServerJSON     = CCETools::param($this->params, 'CCE_KEYCLOAK_smtpServer', '"{}"');
+        $this->kcSmtpServer = json_decode($smtpServerJSON, true);
+
         parent::__construct();
     }
 
-    private function addAnswerValue(&$answerValues, $rawValue, $choice)
+    /**
+     * @param       $answers
+     * @param       $rawValue
+     * @param       $choice
+     */
+    private function addAnswer(&$answers, $rawValue, $choice)
     {
         if (!empty($choice) && !empty($choice->id)) {
             $choice = $choice->id;
         } else {
             $choice = null;
         }
-        $answerValues[] = ['rawValue' => $rawValue ?? "", "choice" => $choice ?? null];
+        $answers[] = ['rawValue' => $rawValue ?? "", "choice" => $choice ?? null];
     }
 
+    /**
+     * @param $filename
+     *
+     * @return mixed
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    private function addPhotos($filename, $ext = '')
+    {
+        $tmpFile = $this->kernel->getLocalTmpDir() . '/' . basename($filename) . $ext;
+        copy($filename, $tmpFile);
+
+        $response = $this->doUploadFileRequest(UserMedia::class, $tmpFile);
+        $response = json_decode($response->getContent(), true);
+        unlink($tmpFile);
+        $this->logUseTime(" DEMO:LOAD upload photo");
+
+        return $response['id'];
+    }
+
+    /**
+     * @throws \League\Flysystem\FileNotFoundException
+     */
     private function cleanStorage()
     {
         $files = $this->mediaFilesystem->listContents('/', true);
@@ -155,34 +302,17 @@ class DemoLoadCommand extends Command
         }
     }
 
-    private function doDeleteRequest($class, $id, $headers = [])
-    {
-        $this->init();
-        $opt = empty($headers) ? $this->headers : $headers;
-        if (is_array($id)) {
-            $iri = static::findIriBy($class, $id);
-        } else {
-            $iri = $this->getIriConverter()->getIriFromResourceClass($class);
-            if (!empty($id)) {
-                $iri = "$iri/$id";
-            }
-        }
-        return $this->doRequest($iri, 'DELETE', $opt);
-    }
-
-    private function doDirectRequest($operation, $url)
-    {
-        return $this->getbrowserClient()->request($operation, $url, $this->headers);
-    }
 
     /**
-     * @param       $route
-     * @param array $headers
+     * @param        $class
+     * @param null   $id
+     * @param string $additionnalRoute
+     * @param array  $params
      *
-     * @return \ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Response|\Symfony\Contracts\browserClient\ResponseInterface
-     * @throws \Symfony\Contracts\browserClient\Exception\TransportExceptionInterface
+     * @return \Symfony\Contracts\HttpClient\ResponseInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    private function doGetRequest($class, $id = null, $additionnalRoute = "", $params = [], $files = [])
+    private function doGetRequest($class, $id = null, $additionnalRoute = "", $params = [])
     {
         $this->init();
         $opt = $this->headers;
@@ -198,20 +328,7 @@ class DemoLoadCommand extends Command
         if (!empty($params)) {
             $opt['query'] = $params;
         }
-        return $this->doRequest($iri, 'GET', $opt, $files);
-    }
-
-    private function doGetSubresourceRequest($class, $id, $sub, $headers = [], $files = [])
-    {
-        $this->init();
-        $opt = empty($headers) ? $this->headers : $headers;
-        $this->assertIsString($id);
-        $this->assertIsString($sub);
-        $iri = $this->getIriConverter()->getIriFromResourceClass($class);
-
-        $iri = $iri . '/' . $id . '/' . $sub;
-
-        return $this->doRequest($iri, 'GET', $opt, $files);
+        return $this->doRequest($iri, 'GET', $opt);
     }
 
     /**
@@ -221,12 +338,12 @@ class DemoLoadCommand extends Command
      * @return \ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Response|\Symfony\Contracts\browserClient\ResponseInterface
      * @throws \Symfony\Contracts\browserClient\Exception\TransportExceptionInterface
      */
-    private function doPatchRequest($class, $id, $data, $headers = [])
+    private function doPatchRequest($class, $id, $data)
     {
         $this->init();
-        $headers                            = $this->headers;
-        $headers['headers']['content-type'] = 'application/merge-patch+json';
-        $opt                                = array_merge($headers, ['body' => json_encode($data)]);
+        $hdrs                            = $this->headers;
+        $hdrs['headers']['content-type'] = 'application/merge-patch+json';
+        $opt                             = array_merge($hdrs, ['body' => json_encode($data)]);
 
         $iri = $this->getIriConverter()->getIriFromResourceClass($class);
         return $this->doRequest("$iri/$id", 'PATCH', $opt);
@@ -241,12 +358,12 @@ class DemoLoadCommand extends Command
      *
      * @return \ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Response|\Symfony\Contracts\HttpClient\ResponseInterface
      */
-    private function doPatchWithActionRequest($class, $id, $data, $action, $headers = [])
+    private function doPatchWithActionRequest($class, $id, $data, $action)
     {
         $this->init();
-        $headers                            = $this->headers;
-        $headers['headers']['content-type'] = 'application/merge-patch+json';
-        $opt                                = array_merge($headers, ['body' => json_encode($data)]);
+        $hdrs                            = $this->headers;
+        $hdrs['headers']['content-type'] = 'application/merge-patch+json';
+        $opt                             = array_merge($hdrs, ['body' => json_encode($data)]);
 
         $iri = $this->getIriConverter()->getIriFromResourceClass($class);
         return $this->doRequest("$iri/$id/$action", 'PATCH', $opt);
@@ -267,46 +384,106 @@ class DemoLoadCommand extends Command
         return $this->doRequest($iri, 'POST', $opt);
     }
 
-    private function doRequest($iri, $operation, $options, $file = [])
+    /**
+     * @param        $iri
+     * @param        $operation
+     * @param        $options
+     * @param string $file
+     *
+     * @return \Symfony\Contracts\HttpClient\ResponseInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    private function doRequest($iri, $operation, $options = null, $file = '')
     {
-        $hostname = gethostbyaddr(gethostbyname(gethostname()));
-
-        $defaultURL = 'https://cockpitce.' . $hostname . '/core';
-        $url        = CCETools::param($this->params, 'CCE_APIURL', $defaultURL) . $iri;
+        if (empty($options)) {
+            $options = $this->headers;
+        }
+        $url = $this->coreUrl . $iri;
 
         if (!empty($this->getFakedate())) {
             $options['headers']['X-FAKETIME'] = $this->getFakedate();
         }
-        return $this->getbrowserClient()->request($operation, $url, $options, $file);
+        if (!empty($file)) {
+            $formFields = [
+                'file' => DataPart::fromPath($file)
+            ];
+
+            $formData = new FormDataPart($formFields);
+            $formData->getHeaders()->addTextHeader('Authorization', 'Bearer ' . $this->getToken());
+
+            return $this->getbrowserClient()->request('POST', $this->coreUrl . $iri, [
+                'headers' => $formData->getPreparedHeaders()->toArray(),
+                'body'    => $formData->bodyToString(),
+            ]);
+        } else {
+            return $this->getbrowserClient()->request($operation, $url, $options);
+
+        }
     }
 
-    private function doUploadFileRequest($class, $files)
+    /**
+     * @param $class
+     * @param $file
+     *
+     * @return \Symfony\Contracts\HttpClient\ResponseInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    private function doUploadFileRequest($class, $file)
     {
         $this->init();
-        $hdr                            = $this->headers;
-        $hdr['headers']['content-type'] = 'multipart/formdata';
+        $hdr = $this->headers;
 
         $iri = $this->getIriConverter()->getIriFromResourceClass($class);
-        return $this->doRequest($iri, 'POST', $hdr, $files);
+        return $this->doRequest($iri, 'POST', $hdr, $file);
     }
 
-    private function fillFolder(&$folder)
+    /**
+     */
+    private function fillFolder(&$folderTpl)
     {
         $faker = Factory::create();
 
-        foreach ($folder->questionnaires as $questionnaire) {
+        foreach ($folderTpl->questionnaires as &$questionnaire) {
+            // add tasks
+            for ($currentTaskIdx = 0; $currentTaskIdx < rand(0, 5); $currentTaskIdx++) {
+                $countInformed = rand(0, 3);
+                for ($inf = 0; $inf < $countInformed; $inf++) {
+                    $response = $this->doRequest("/api/users?search=" . $this->normalUser[array_rand($this->normalUser)],
+                                                 'GET');
+                    $user     = json_decode($response->getContent());
+                    if (!empty($user) && is_array($user)) {
+                        $questionnaire->tasks[$currentTaskIdx]['informed'][] = $user[0];
+                    }
+                }
+                $response                                             = $this->doRequest("/api/users?search=" . $this->normalUser[array_rand($this->normalUser)],
+                                                                                         'GET');
+                $user                                                 = json_decode($response->getContent());
+                $questionnaire->tasks[$currentTaskIdx]['responsible'] = $user[0];
+                $questionnaire->tasks[$currentTaskIdx]['action']      = $faker->sentence(20);
+                $questionnaire->tasks[$currentTaskIdx]['dueDate']     = rand(0,3)>0?$faker->dateTimeBetween('now', '+1 month')->format("Y-m-d H:i"):null;
+            }
             foreach ($questionnaire->blocks as $block) {
-                foreach ($block->questionAnswers as &$questionAnswer) {
-                    $answerValues = [];
-                    $choices      = $questionAnswer->question->choices;
+                foreach ($block->questions as &$question) {
+                    $answers = [];
+                    $choices = $question->choices;
                     if (empty($choices)) {
                         continue;
                     }
-                    $writeRender = $questionAnswer->question->writeRenderer;
-                    $maxChoices  = $questionAnswer->question->maxChoices > 0 ?: count($choices);
+                    $writeRender = $question->writeRenderer;
+                    $maxChoices  = $question->maxChoices > 0 ?: count($choices);
+                    $maxPhotos   = $question->maxPhotos;
 
-                    $nbChoices = rand($questionAnswer->question->minChoices, $maxChoices);
-
+                    $nbChoices = rand($question->minChoices, $maxChoices);
+                    $nbPhotos  = rand(0, $maxPhotos);
+                    $photos    = [];
+                    for ($n = 0; $n < $nbPhotos; $n++) {
+                        if($this->simpleimage) {
+                            $photos[] = $this->addPhotos($this->kernel->getProjectDir()."/GrumpyBear.png", '.png');
+                        }else {
+                            $photos[] = $this->addPhotos("https://picsum.photos/500/300", '.jpg');
+                        }
+                    }
+                    $question->photos = $photos;
                     if ($nbChoices === 0) {
                         continue;
                     }
@@ -319,33 +496,34 @@ class DemoLoadCommand extends Command
                             case 'none':
                                 break;
                             case 'text':
-                                $this->addAnswerValue($answerValues, $faker->sentence(rand(2, 20)), $chosenChoice);
+                                $this->addAnswer($answers, $faker->sentence(rand(2, 20)), $chosenChoice);
                                 break;
                             case 'select':
-                                $this->addAnswerValue($answerValues, strval($chosenChoice->position), $chosenChoice);
+                                $this->addAnswer($answers, strval($chosenChoice->position), $chosenChoice);
                                 break;
                             case 'dateTime':
-                                $this->addAnswerValue($answerValues, $faker->dateTimeBetween('-1 years',
-                                                                                             $this->getFakedate())->format("Y-m-d H:i"),
-                                                      $chosenChoice);
+                                $this->addAnswer($answers,
+                                                 $faker->dateTimeBetween('-1 years',
+                                                                         $this->getFakedate())->format("Y-m-d H:i"),
+                                                 $chosenChoice);
                                 break;
                             case
                             'range': // ??
                             case 'number':
                                 $min = $writeRender->min ?? 0;
                                 $max = $writeRender->max ?? 0;
-                                $this->addAnswerValue($answerValues, strval($faker->numberBetween($min, $max)),
-                                                      $chosenChoice);
+                                $this->addAnswer($answers, strval($faker->numberBetween($min, $max)),
+                                                 $chosenChoice);
                                 break;
                         }
                     }
-                    $questionAnswer->answerValues = $answerValues;
+                    $question->answers = $answers;
                 }
             }
         }
     }
 
-    private function getBrowserClient(): CurlHttpClient
+    private function getBrowserClient()
     {
         if (empty($this->browserClient)) {
             $this->browserClient = HttpClient::create();
@@ -376,10 +554,10 @@ class DemoLoadCommand extends Command
     {
         if (empty($this->kc)) {
             $this->kc = new KeycloakConnector(
-                CCETools::param($this->params, 'CCE_KEYCLOAKURL'),
-                CCETools::param($this->params, 'CCE_KEYCLOAKSECRET'),
-                CCETools::param($this->params, 'CCE_coreclient'),
-                CCETools::param($this->params, 'CCE_KEYCLOAKREALM')
+                $this->kcUrl,
+                $this->kcSecret,
+                $this->kcCoreClient,
+                $this->kcRealm
             );
         }
         return $this->kc;
@@ -415,57 +593,42 @@ class DemoLoadCommand extends Command
         return $this->userId;
     }
 
-    private function importRealm($token, $json, $url)
-    {
-        // https://keycloak.vagrant.cockpitlab.local/auth/admin/realms/cockpit-ce/partialImport
-        $options['base_uri'] = $url;
-        $options['headers']  = [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type'  => 'application/json;charset=UTF-8'
-        ];
-        $httpClient          = new Client($options);
-        try {
-            $response = $httpClient->request(
-                'POST',
-                $url . '/partialImport',
-                $json
-            );
-            return json_decode($response->getBody(), true);
-
-        } catch (ClientException $e) {
-            // en cas d'erreur 4xx
-            return [];
-        }
-
-    }
-
+    /**
+     *
+     */
     private function init()
     {
+        $mimeJSON      = 'application/json';
         $this->options = [
             'HTTP_AUTHORIZATION' => 'Bearer ' . $this->getToken(),
-            'CONTENT_TYPE'       => 'application/json',
+            'CONTENT_TYPE'       => $mimeJSON,
         ];
         $this->headers = [
             'headers' => [
-                'content-type'  => 'application/json',
-                'accept'        => 'application/json',
+                'content-type'  => $mimeJSON,
+                'accept'        => $mimeJSON,
                 'Authorization' => 'Bearer ' . $this->getToken()
             ]
         ];
     }
 
+    /**
+     * @param $keycloakFile
+     *
+     * @return int
+     * @throws \Exception
+     */
     private function loadKeycloak($keycloakFile)
     {
         $this->output->write("<info>Processing Keycloak import...</info>\n");
         // creates a  progress bar (50 units)
         $progressBar         = new ProgressBar($this->output, 5);
-        $keycloakUrl         = CCETools::param($this->params, 'CCE_KEYCLOAKURL', 'http://localhost:8080');
         $keycloakAdminClient = KeycloakClient::factory([
                                                            'realm'     => 'master',
                                                            'username'  => $this->kc_admin,
                                                            'password'  => $this->kc_adminpwd,
                                                            'client_id' => 'admin-cli',
-                                                           'baseUri'   => $keycloakUrl,
+                                                           'baseUri'   => $this->kcUrl,
                                                            'Accept'    => 'application/json, text/plain'
                                                        ]);
 
@@ -475,41 +638,52 @@ class DemoLoadCommand extends Command
         }
 
         $keycloakJSON = file_get_contents($keycloakFile);
-        $defaultURL   = CCETools::param($this->params, 'CCE_DEFAULTURL');
-        $keycloakJSON = str_replace('%%cockpitcedefaulturl%%', $defaultURL, $keycloakJSON);
+        $keycloakJSON = str_replace('%%cockpitcebaseurl%%', $this->baseUrl, $keycloakJSON);
+        $keycloakJSON = str_replace('%%cockpitcerealm%%', $this->kcRealm, $keycloakJSON);
+        $keycloakJSON = str_replace('%%cockpitcoresecret%%', $this->kcSecret, $keycloakJSON);
 
-        $this->output->write("\n\t<info>deleting realm $this->kc_realm</info>\n");
-        $res = $keycloakAdminClient->deleteRealm(['realm' => $this->kc_realm]);
+        $this->output->write("\n\t<info>deleting realm $this->kcRealm</info>\n");
+        $keycloakAdminClient->deleteRealm(['realm' => $this->kcRealm]);
         $progressBar->advance();
-        $this->output->write("\n\t<info>creating realm $this->kc_realm</info>\n");
-        $res = $keycloakAdminClient->importRealm([
-                                                     'realm'                       => $this->kc_realm,
-                                                     'enabled'                     => true,
-                                                     "internationalizationEnabled" => true,
-                                                     "supportedLocales"            => [
+        $this->output->write("\n\t<info>creating realm $this->kcRealm</info>\n");
+
+        $ret = $keycloakAdminClient->importRealm([
+                                                     'realm'                              => $this->kcRealm,
+                                                     'enabled'                            => true,
+                                                     "internationalizationEnabled"        => true,
+                                                     "accessTokenLifespan"                => 300 * $this->tokenDelayMultiplier,
+                                                     "accessTokenLifespanForImplicitFlow" => 900 * $this->tokenDelayMultiplier,
+                                                     "supportedLocales"                   => [
                                                          "en",
                                                          "fr"
                                                      ],
-                                                     "defaultLocale"               => "en"
+                                                     "smtpServer"                         => $this->kcSmtpServer,
+                                                     "defaultLocale"                      => "en"
                                                  ]);
+
+        if (!empty($ret['error'])) {
+            $this->output->write("<error>" . $ret['error'] . "</error>\n");
+            exit(1);
+
+        }
         $progressBar->advance();
         $this->output->write("\n\t<info>importing $keycloakFile</info>\n");
         $realmData                     = json_decode($keycloakJSON, true, 128);
         $realmData['ifResourceExists'] = 'OVERWRITE';
 
         $adminKc = new KeycloakConnector(
-            CCETools::param($this->params, 'CCE_KEYCLOAKURL'),
+            $this->kcUrl,
             ['username' => $this->kc_admin, 'password' => $this->kc_adminpwd],
             'admin-cli',
             'master'
         );
 
-        $adminKc->partialImport($this->kc_realm, $keycloakJSON);
+        $adminKc->partialImport($this->kcRealm, $keycloakJSON);
 
-        $users = $keycloakAdminClient->getUsers(['realm' => $this->kc_realm]);
+        $users = $keycloakAdminClient->getUsers(['realm' => $this->kcRealm]);
         $this->output->write("\n\t<info>setting user default password</info>\n");
         foreach ($users as $currentUser) {
-            $adminKc->setUserPassword($currentUser['id'], $this->kc_realm, strtolower($currentUser['username']));
+            $adminKc->setUserPassword($currentUser['id'], $this->kcRealm, strtolower($currentUser['username']));
             $this->output->write("<comment>\t\t" . $currentUser['username'] . "</comment>\n");
         }
         $progressBar->advance();
@@ -523,6 +697,15 @@ class DemoLoadCommand extends Command
 
     }
 
+    /**
+     * @param $templateFile
+     *
+     * @return int
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     private function loadTemplates($templateFile)
     {
         if (!empty($templateFile)) {
@@ -572,7 +755,7 @@ class DemoLoadCommand extends Command
                                 $this->idMapping[$currentLocalid] = $response['id'];
                             }
                         } else {
-                            $c     = $response->getContent();
+                            $response->getContent();
                             $error = json_decode($response->getContent(), JSON_PRETTY_PRINT);
 
                             $this->output->write("<error>$error</error>\n");
@@ -588,6 +771,21 @@ class DemoLoadCommand extends Command
         return 0;
     }
 
+    private function logUseTime(string $msg)
+    {
+        $useTime          = (hrtime(true) - $this->time_start) / 100000;
+        $this->time_start = hrtime(true);
+        $msg              = "[execution time $useTime ms] $msg";
+        $this->getLogger()->debug($msg);
+    }
+
+    /**
+     * @return int
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     private function makeFakeData()
     {
 
@@ -595,10 +793,11 @@ class DemoLoadCommand extends Command
         for ($i = 0; $i < count($this->normalUser); $i++) {
             $this->setViewClient()->setNormalUser($i);
             $currentUser = $this->normalUser[$i];
-            $this->output->write("<info>Processing user $currentUser </info>\n");
+            $this->output->write("<info>Processing user $currentUser</info>\n");
             // get targets
             $response   = $this->doGetRequest(Target::class, null, null, ['right' => 'CREATE']);
             $statusCode = $response->getStatusCode();
+            $this->logUseTime(" DEMO:LOAD get Target");
             if ($statusCode == 200) {
                 $targets = json_decode($response->getContent(), true);
 
@@ -607,22 +806,23 @@ class DemoLoadCommand extends Command
                     if (!in_array('CREATE', $target['rights'])) {
                         continue;
                     }
-                    // get TplFolders
-                    $response   = $this->doGetRequest(TplFolder::class, null, 'periods');
+                    // get FolderTpls
+                    $response   = $this->doGetRequest(FolderTpl::class, null, 'periods');
                     $statusCode = $response->getStatusCode();
+                    $this->logUseTime(" DEMO:LOAD get Folder periods");
                     if ($statusCode == 200) {
-                        $tplFolders = json_decode($response->getContent(), true);
+                        $folderTpls = json_decode($response->getContent(), true);
 
                         // process each Template Folder
-                        foreach ($tplFolders as $tplFolder) {
+                        foreach ($folderTpls as $folderTpl) {
 
-                            $periods = $tplFolder['periods'];
+                            $periods = $folderTpl['periods'];
                             foreach ($periods as $idx => $period) {
                                 if (strtotime($period['start']) >= time()) {
                                     unset($periods[$idx]);
                                 }
                             }
-                            $folderLabel = $tplFolder['label'];
+                            $folderLabel = $folderTpl['label'];
                             $this->output->write("<info>\t\tProcessing Folder $folderLabel </info>\n");
                             $progressBar = new ProgressBar($this->output, count($periods));
 
@@ -631,8 +831,8 @@ class DemoLoadCommand extends Command
 
                                 // maybe, create the folder
                                 // make some tricks to randomize creation (or not)
-                                $minFolders = $tplFolder['minFolders'] ?? 1;
-                                $maxFolders = $tplFolder['maxFolders'] ?? 3; // 0 means no limit...
+                                $minFolders = $folderTpl['minFolders'] ?? 1;
+                                $maxFolders = $folderTpl['maxFolders'] ?? 3; // 0 means no limit...
                                 $maxFolder  = rand($minFolders, $maxFolders); // decrease maxfolder randomly
                                 $minFolder  = rand($minFolders, $maxFolders);
 
@@ -645,27 +845,33 @@ class DemoLoadCommand extends Command
                                     $this->setFakeDate($date->format('r'));
 
                                     // create a folder
-                                    $folder     = ['target' => $target['id'], 'tplFolder' => $tplFolder['id']];
+                                    $folder = ['target' => $target['id'], 'folderTpl' => $folderTpl['id']];
+                                    $this->logUseTime(" DEMO:LOAD prepare folder periods");
                                     $response   = $this->doPostRequest(Folder::class, $folder);
                                     $statusCode = $response->getStatusCode();
+                                    $this->logUseTime(" DEMO:LOAD create folder");
                                     if ($statusCode == 201) {
                                         $folder = json_decode($response->getContent());
                                         $this->fillFolder($folder);
+                                        $this->logUseTime(" DEMO:LOAD fill folder");
                                         $folder     = json_decode(json_encode($folder), true);
                                         $response   = $this->doPatchRequest(Folder::class, $folder['id'], $folder);
                                         $statusCode = $response->getStatusCode();
+                                        $this->logUseTime(" DEMO:LOAD update folder");
                                         if ($statusCode == 200) {
                                             // submit folder
-                                            $response   = $this->doPatchWithActionRequest(Folder::class, $folder['id'],
-                                                                                          [], 'submit');
-                                            $statusCode = $response->getStatusCode();
+                                            $response = $this->doPatchWithActionRequest(Folder::class, $folder['id'],
+                                                                                        [], 'submit');
+                                            $this->logUseTime(" DEMO:LOAD submit folder");
                                             if ($statusCode != 200) {
-                                                $error = json_decode($response->getContent(), JSON_PRETTY_PRINT);
+                                                $content = $response->getContent();
+                                                $error   = json_decode($content, JSON_PRETTY_PRINT);
 
                                                 $this->output->write("<error>$error</error>\n");
                                             }
                                         } else {
-                                            $error = json_decode($response->getContent(), JSON_PRETTY_PRINT);
+                                            $content = $response->getContent();
+                                            $error   = json_decode($content, JSON_PRETTY_PRINT);
 
                                             $this->output->write("<error>$error</error>\n");
                                             return 1;
@@ -693,70 +899,99 @@ class DemoLoadCommand extends Command
 
     }
 
+    /**
+     * @throws \Exception
+     */
     private function rebuildDB()
     {
         $this->output->write("<info>Rebuilding DB...</info>");
 
         // check src owner and permissions
 
-        $entitiesToIgnore = ['src/Entity/TplFolderCalendar.php', 'src/Entity/TplFolderQuestionnaire.php'];
+        $entitiesToIgnore = [
+//            'src/Entity/FolderTplCalendar.php'      => 'src/Entity/FolderTplCalendar.notentity',
+//            'src/Entity/QuestionnaireTplBlockTpl.php' => 'src/Entity/QuestionnaireTplBlockTpl.notentity'
+        ];
 
         $error = false;
-        foreach ($entitiesToIgnore as $entity) {
-            if (!is_writable($entity)) {
-                $this->output->writeln(sprintf("<error>file '%s' not writable </error>", $entity));
-                $error = true;
+        foreach ($entitiesToIgnore as $phpFilename => $notEntityFilename) {
+            if (file_exists($phpFilename)) {
+                if (!is_writable($phpFilename)) {
+                    $this->output->writeln(sprintf("<error>file '%s' not writable </error>", $phpFilename));
+                    $error = true;
+                } else {
+                    // rename file
+                    rename($phpFilename, $notEntityFilename);
+                }
+            } else {
+                if (!file_exists($notEntityFilename)) {
+                    $this->output->writeln(sprintf("<error>Neither files '%s' or '%s' exists </error>", $phpFilename,
+                                                   $notEntityFilename));
+                    $error = true;
+                }
             }
         }
+
         if ($error) {
             exit(1);
         }
 
         // drop database
         $this->output->writeln("<comment>Drop DB...</comment>");
-        $command    = $this->getApplication()->find('doctrine:database:drop');
-        $arguments  = ['--force' => true];
-        $returnCode = $command->run(new ArrayInput($arguments), $this->output);
+        $command   = $this->getApplication()->find('doctrine:database:drop');
+        $arguments = ['--force' => true];
+        $command->run(new ArrayInput($arguments), $this->output);
 
         // create database
         $this->output->writeln("<comment>Create DB...</comment>");
-        $command    = $this->getApplication()->find('doctrine:database:create');
-        $arguments  = [];
-        $returnCode = $command->run(new ArrayInput($arguments), $this->output);
+        $command   = $this->getApplication()->find('doctrine:database:create');
+        $arguments = [];
+        $command->run(new ArrayInput($arguments), $this->output);
 
         // create database schema
         $this->output->writeln("<comment>Create Schema...</comment>");
-        $preCreateScript  = "
-            mv src/Entity/TplFolderCalendar.php src/Entity/TplFolderCalendar.notentity;\
-            mv src/Entity/TplFolderQuestionnaire.php src/Entity/TplFolderQuestionnaire.notentity";
-        $postCreateScript = "
-            mv src/Entity/TplFolderCalendar.notentity src/Entity/TplFolderCalendar.php;\
-            mv src/Entity/TplFolderQuestionnaire.notentity src/Entity/TplFolderQuestionnaire.php";
-        $command          = $this->getApplication()->find('doctrine:schema:update');
-        $arguments        = ['--force' => true];
-        exec($preCreateScript);
-        $returnCode = $command->run(new ArrayInput($arguments), $this->output);
-        exec($postCreateScript);
+        $command   = $this->getApplication()->find('doctrine:schema:update');
+        $arguments = ['--force' => true];
+        $command->run(new ArrayInput($arguments), $this->output);
+        foreach ($entitiesToIgnore as $phpFilename => $notEntityFilename) {
+            if (file_exists($notEntityFilename)) {
+                if (!is_writable($notEntityFilename)) {
+                    $this->output->writeln(sprintf("<error>file '%s' not writable </error>", $notEntityFilename));
+                    $error = true;
+                } else {
+                    // rename file
+                    rename($notEntityFilename, $phpFilename);
+                }
+            } else {
+                if (!file_exists($phpFilename)) {
+                    $this->output->writeln(sprintf("<error>Neither files '%s' or '%s' exists </error>", $phpFilename,
+                                                   $notEntityFilename));
+                    $error = true;
+                }
+            }
+        }
+        if ($error) {
+            exit(1);
+        }
 
         $this->output->writeln("<info>Done!\n</info>");
     }
 
+    /**
+     *
+     */
     private function rebuildKCKeys()
     {
         $this->output->write("<info>\nRebuilding keycloak keys...</info>");
-        $keycloakUrl             = CCETools::param($this->params, 'CCE_KEYCLOAKURL', 'http://localhost:8080');
-        $this->publicKeyFile     = $this->params->get('JWT_PUBLIC_KEY');
-        $this->privateKeyFile    = $this->params->get('JWT_SECRET_KEY');
-        $this->privatesecretFile = $this->params->get('JWT_PASSPHRASEFILE');
 
         $keycloakAdminClient = KeycloakClient::factory([
                                                            'realm'     => 'master',
                                                            'username'  => $this->kc_admin,
                                                            'password'  => $this->kc_adminpwd,
                                                            'client_id' => 'admin-cli',
-                                                           'baseUri'   => $keycloakUrl
+                                                           'baseUri'   => $this->kcUrl
                                                        ]);
-        $keys                = $keycloakAdminClient->getRealmKeys(['realm' => $this->kc_realm]);
+        $keys                = $keycloakAdminClient->getRealmKeys(['realm' => $this->kcRealm]);
         $key                 = "";
         $publickey           = "";
         foreach ($keys['keys'] as $k) {
@@ -766,11 +1001,11 @@ class DemoLoadCommand extends Command
 
         // Save key/publicKey in file
         if (file_exists($this->publicKeyFile)) {
-            chmod($this->publicKeyFile, 0666);
+            @chmod($this->publicKeyFile, 0666);
         }
 
         if (file_exists($this->privateKeyFile)) {
-            chmod($this->privateKeyFile, 0666);
+            @chmod($this->privateKeyFile, 0666);
         }
         file_put_contents($this->publicKeyFile, "-----BEGIN PUBLIC KEY-----\n");
         while ($line = substr($publickey, 0, 64)) {
@@ -785,37 +1020,21 @@ class DemoLoadCommand extends Command
             $key = substr($key, 64);
         }
         file_put_contents($this->privateKeyFile, "-----END RSA PRIVATE KEY-----", FILE_APPEND);
-        chmod($this->publicKeyFile, 0644);
-        chmod($this->privateKeyFile, 0644);
+        @chmod($this->publicKeyFile, 0644);
+        @chmod($this->privateKeyFile, 0644);
 
-        $clients  = $keycloakAdminClient->getClients(['realm' => $this->kc_realm]);
+        $clients  = $keycloakAdminClient->getClients(['realm' => $this->kcRealm]);
         $clientId = '';
         foreach ($clients as $client) {
             $clientId = $client['clientId'] === 'cockpitcore' ? $client['id'] : $clientId;
         }
-        $secret = $keycloakAdminClient->getClientSecret(['realm' => $this->kc_realm, 'id' => $clientId]);
+        $secret = $keycloakAdminClient->getClientSecret(['realm' => $this->kcRealm, 'id' => $clientId]);
         $secret = $secret['value'];
-        if (file_exists($this->privatesecretFile)) {
-            chmod($this->privatesecretFile, 0666);
+
+        if ($secret != $this->kcSecret) {
+            $this->output->write("<error>secret in keycloak does not match secret in .env!\n</error>");
         }
-        file_put_contents($this->privatesecretFile, $secret);
-        chmod($this->privatesecretFile, 0644);
         $this->output->write("<info>DONE!\n</info>");
-    }
-
-    private function removeEmptyArray($haystack)
-    {
-        foreach ($haystack as $key => $value) {
-            if (is_array($value)) {
-                $haystack[$key] = $this->removeEmptyArray($haystack[$key]);
-            }
-
-            if (empty($haystack[$key])) {
-                unset($haystack[$key]);
-            }
-        }
-
-        return $haystack;
     }
 
     /**
@@ -912,6 +1131,11 @@ class DemoLoadCommand extends Command
         return $this;
     }
 
+    /**
+     * @param false $onlyData
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     */
     protected function cleanTables($onlyData = false)
     {
         $connection = $this->entityManager->getConnection();
@@ -928,10 +1152,6 @@ class DemoLoadCommand extends Command
             $stmt->execute();
         }
         foreach ($tables as $table) {
-            if ($onlyData && (preg_match('/tpl|Calendars|Categories|TplFolderPermissions|QuestionChoices/i', $table))) {
-                continue;
-            }
-
             if ($isMysql) {
                 $sql = "TRUNCATE TABLE $table;";
             } else {
@@ -951,6 +1171,9 @@ class DemoLoadCommand extends Command
         $this->output->write("\n");
     }
 
+    /**
+     *
+     */
     protected function configure()
     {
         // the short description shown while running "php bin/console list"
@@ -966,15 +1189,28 @@ class DemoLoadCommand extends Command
         $this->addOption('keycloak', null, InputOption::VALUE_OPTIONAL, 'The keycloak json file to load');
         $this->addOption('kcadmin', null, InputOption::VALUE_OPTIONAL, 'The keycloak admin user', 'admin');
         $this->addOption('kcadminpwd', null, InputOption::VALUE_OPTIONAL, 'The keycloak admin password', '');
+        $this->addOption('testtoken', null, InputOption::VALUE_NONE, 'high delay token.');
         $this->addOption('fakedata', null, InputOption::VALUE_NONE, 'instantiate and generate fake data.');
         $this->addOption('rebuild', null, InputOption::VALUE_NONE, 'rebuild DB first.');
         $this->addOption('kcrebuild', null, InputOption::VALUE_NONE, 'rebuild Keycloak Keys.');
         $this->addOption('clean', null, InputOption::VALUE_NONE, 'truncate all tables first.');
         $this->addOption('cleandata', null, InputOption::VALUE_NONE, 'truncate data tables first.');
         $this->addOption('tests', null, InputOption::VALUE_NONE, 'load for tests (less users).');
-        $this->addArgument('dummy', InputArgument::OPTIONAL, 'dummy.');
+        $this->addOption('simpleimage', null,InputOption::VALUE_NONE, 'no picsum image.');
     }
 
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @return int
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \League\Flysystem\FileNotFoundException
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // ...
@@ -993,9 +1229,17 @@ class DemoLoadCommand extends Command
             $this->normalPwd = $this->normalUser = $this->normalUserTests;
         }
 
+        $this->simpleimage=$input->getOption('simpleimage');
+
+        $this->tokenDelayMultiplier = 1;
+        if ($input->getOption('testtoken')) {
+            $this->tokenDelayMultiplier = 60 * 24;
+        }
+
         if (!empty($keycloak)) {
             $this->loadKeycloak($keycloak);
         }
+
         if ($input->getOption('kcrebuild')) {
             $this->rebuildKCKeys();
         }
@@ -1004,7 +1248,6 @@ class DemoLoadCommand extends Command
             $this->cleanStorage();
             $this->rebuildDB();
         }
-
         if ($input->getOption('clean')) {
             $this->getToken(true); // force token regenerate
             $this->cleanStorage();
@@ -1046,6 +1289,22 @@ class DemoLoadCommand extends Command
     }
 
     /**
+     * @return \Psr\Log\LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param \App\Command\LoggerInterface $logger
+     */
+    public function setLogger(\App\Command\LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
+    }
+
+    /**
      * @return string
      */
     public function getPassword(): string
@@ -1069,4 +1328,5 @@ class DemoLoadCommand extends Command
         $this->kc = $kc;
         return $this;
     }
+
 }

@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,9 +27,9 @@
 namespace App\Tests\API;
 
 use App\Entity\Calendar;
-use App\Entity\Folder;
-use App\Entity\UserMedia;
-use App\Entity\TplFolder;
+use App\Entity\Folder\Folder;
+use App\Entity\Media\UserMedia;
+use App\Entity\Folder\FolderTpl;
 use CronExpressionGenerator\FakerProvider;
 use Faker\Factory;
 use Ramsey\Uuid\Uuid;
@@ -39,43 +40,13 @@ require_once('_ApiTest.php');
 
 class APIAnswersTest extends ApiTest
 {
-    private function addImage()
-    {
-        $imageFile = __DIR__ . '/GrumpyBear.png';
-        $this->setViewClient()->setNormalUser();
-        $this->preTest();
-
-        $response = $this->doGetRequest(UserMedia::class);
-
-        $uploadedFile = new UploadedFile(
-            $imageFile,
-            'GrumpyBear.'
-        );
-
-        $file     = ['foo' => $uploadedFile];
-        $response = $this->doUploadFileRequest(UserMedia::class, $file);
-        $this->assertResponseStatusCodeSame(400);
-
-        $file     = ['file' => $uploadedFile];
-        $response = $this->doUploadFileRequest(UserMedia::class, $file);
-        $this->assertResponseStatusCodeSame(201);
-
-        $this->assertMatchesResourceCollectionJsonSchema(UserMedia::class);
-        $this->assertNotEmpty(json_decode($response->getContent()));
-
-        $imageResponse = json_decode($response->getContent(), true);
-        $imageId       = $imageResponse['id'];
-        return $imageId;
-
-    }
-
     public function createFolder(): string
     {
-        // get TplFolder id
+        // get Folder id
         $this->setNormalUser()->setViewClient();
-        $TplFolderId = $this->getAnId(TplFolder::class);
+        $TplFolderId = $this->getAnId(FolderTpl::class);
         $this->assertTrue(Uuid::isValid($TplFolderId), "This is not an valid UUID");
-        $TplFolderIri = $this->findIriBy(TplFolder::class, ['id' => $TplFolderId]);
+        $TplFolderIri = $this->findIriBy(FolderTpl::class, ['id' => $TplFolderId]);
 
         // get a target
         $response = $this->doDirectRequest("GET", "/api/targets");
@@ -83,13 +54,14 @@ class APIAnswersTest extends ApiTest
         $targets  = json_decode($targets, true);
         $targetId = $targets[0]['id'];
         $data     = [
-            'tplFolder' => $TplFolderIri,
+            'folderTpl' => $TplFolderIri,
             'target'    => $targetId
         ];
         $response = $this->doPostRequest(Folder::class, $data);
         $this->assertResponseStatusCodeSame(201);
+        $response=$response->getContent();
         $this->assertJsonContains($data);
-        $data = json_decode($response->getContent(), true);
+        $data = json_decode($response, true);
         return $data['id'];
 
     }
@@ -123,11 +95,11 @@ class APIAnswersTest extends ApiTest
 
         foreach ($data->questionnaires as &$questionnaire) {
             foreach ($questionnaire->blocks as &$block) {
-                foreach ($block->questionAnswers as &$answer) {
-                    $answer->comment = "Answer comments is that => " . $faker->sentence(40);
+                foreach ($block->questions as &$question) {
+                    $question->comment = "Answer comments is that => " . $faker->sentence(40);
                 }
                 for ($i = 0; $i <= random_int(0, 5); $i++) {
-                    $answer->photos[] = $this->getIri(UserMedia::class, $this->addImage());
+                    $question->photos[] = $this->getIri(UserMedia::class, $this->addImage(UserMedia::class, true));
                 }
             }
         }

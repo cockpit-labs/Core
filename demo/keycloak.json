@@ -1,7 +1,7 @@
 {
   "id": "6d41804d-58d9-46ce-9c3a-a82293aa2711",
-  "realm": "cockpit-ce",
-  "displayName": "cockpit-ce",
+  "realm": "%%cockpitcerealm%%",
+  "displayName": "%%cockpitcerealm%%",
   "notBefore": 0,
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
@@ -1116,7 +1116,7 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/cockpit-ce/account/",
+      "baseUrl": "/realms/%%cockpitcerealm%%/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -1127,7 +1127,7 @@
         "view-profile"
       ],
       "redirectUris": [
-        "/realms/cockpit-ce/account/*"
+        "/realms/%%cockpitcerealm%%/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1163,14 +1163,14 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/cockpit-ce/account/",
+      "baseUrl": "/realms/%%cockpitcerealm%%/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "52c9dcf2-5d53-49ff-954c-1cac9e8e64a0",
       "redirectUris": [
-        "/realms/cockpit-ce/account/*"
+        "/realms/%%cockpitcerealm%%/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1294,14 +1294,14 @@
     {
       "id": "dce93b3e-b12f-46f7-81ce-2e17553fcab2",
       "clientId": "cockpitadmin",
-      "baseUrl": "%%cockpitcedefaulturl%%/",
+      "baseUrl": "%%cockpitcebaseurl%%/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "2de13cbd-84d7-4eca-96f9-7fe708ca67dd",
       "redirectUris": [
-        "%%cockpitcedefaulturl%%/*"
+        "%%cockpitcebaseurl%%/*"
       ],
       "webOrigins": [
         "*"
@@ -1337,14 +1337,14 @@
     {
       "id": "da35d56e-d163-4247-bae5-1eb07ba5fc8a",
       "clientId": "cockpitcore",
-      "baseUrl": "%%cockpitcedefaulturl%%/",
+      "baseUrl": "%%cockpitcebaseurl%%/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "a9c2715f-72bc-4543-a829-7f5afd7283ee",
+      "secret": "%%cockpitcoresecret%%",
       "redirectUris": [
-        "%%cockpitcedefaulturl%%/*"
+        "%%cockpitcebaseurl%%/*"
       ],
       "webOrigins": [
         "*"
@@ -1424,14 +1424,14 @@
     {
       "id": "e8406bd1-d9b8-4805-b748-b451c96b991d",
       "clientId": "cockpitview",
-      "baseUrl": "%%cockpitcedefaulturl%%/",
+      "baseUrl": "%%cockpitcebaseurl%%/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "c790fe75-9bba-4eda-9160-c44c1e802d2c",
       "redirectUris": [
-        "%%cockpitcedefaulturl%%/*"
+        "%%cockpitcebaseurl%%/*"
       ],
       "webOrigins": [
         "*"
@@ -1508,14 +1508,14 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/cockpit-ce/console/",
+      "baseUrl": "/admin/%%cockpitcerealm%%/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "716fdaa3-259e-45b0-9652-7edbebcb6e56",
       "redirectUris": [
-        "/admin/cockpit-ce/console/*"
+        "/admin/%%cockpitcerealm%%/console/*"
       ],
       "webOrigins": [
         "+"

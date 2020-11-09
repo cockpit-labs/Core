@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -28,43 +29,16 @@ namespace App\Doctrine;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
+use App\CentralAdmin\KeycloakConnector;
+use App\DataProvider\CommonDataProvider;
+use App\Entity\Calendar;
+use App\Entity\Folder\FolderTplPermission;
 use App\Traits\stateableEntity;
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
 
-final class PermissionsExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
+final class PermissionsExtension extends CommonDataProvider implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
-    private $security;
-    private $user          = null;
     private $operationName = "";
-    private $params        = null;
-    private $allTplFolders = true;
-
-    /**
-     * PermissionsExtension constructor.
-     *
-     * @param \Symfony\Component\Security\Core\Security $security
-     */
-    public function __construct(Security $security, ParameterBagInterface $params, RequestStack $request)
-    {
-        $this->params = $params;
-        if (!empty($request->getCurrentRequest()->get('all'))) {
-            $this->allTplFolders = strtolower($request->getCurrentRequest()->get('all')) === 'true' ?? false;
-        }
-        $this->permissions_right = '';
-        if (!empty($request->getCurrentRequest()->get('permissions_right'))) {
-            $this->permissions_right = strtoupper($request->getCurrentRequest()->get('permissions_right'));
-        }
-        $this->security = $security;
-        if (!empty($this->security)) {
-            $token = $this->security->getToken();
-            if ($token != null) {
-                $this->user = $token->getUser();
-            }
-        }
-    }
 
     /**
      *
@@ -75,8 +49,8 @@ final class PermissionsExtension implements QueryCollectionExtensionInterface, Q
      */
     private function addWhere(QueryBuilder $queryBuilder, string $resourceClass): void
     {
-        if ($this->user != null && $this->user->getClient() === \App\Service\CCETools::param($this->params,
-                                                                                             'CCE_viewclient')) {
+        if ($this->getUser() != null && $this->getUser()->getClient() === \App\Service\CCETools::param($this->getParameters(),
+                                                                                                       'CCE_viewclient')) {
             $addWhereMethod = explode('\\', $resourceClass);
             $addWhereMethod = end($addWhereMethod) . "AddWhere";
             if (method_exists($this, $addWhereMethod)) {
@@ -94,108 +68,137 @@ final class PermissionsExtension implements QueryCollectionExtensionInterface, Q
      */
     private function folderAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
     {
-        $currentUserID = $this->user->getUsername();
-        $rootAlias     = $queryBuilder->getRootAliases()[0];
-
-        $queryBuilder->join("App:TplFolder", "t");
-        $queryBuilder->andWhere(sprintf("t.id=%s.tplFolder", $rootAlias));
-
-        $queryBuilder->join("App:Calendar", "c");
-        $queryBuilder->join("App:TplFolderCalendar", "fc");
-        $queryBuilder->andWhere(sprintf("c.id=fc.calendar"));
-        if ($this->allTplFolders === false) {
-            $queryBuilder->andWhere(sprintf("c.valid=1"));
+        $allFolderTpls = true;
+        if (!empty($this->getRequest()->get('all'))) {
+            $allFolderTpls = strtolower($this->getRequest()->get('all')) === 'true' ?? false;
         }
+
+        $currentUserName        = $this->getUser()->getUsername();
+        $downmembershipGroups = $this->getKeycloakConnector()->getUserGroups($this->getUser()->id,
+                                                                             KeycloakConnector::DOWNMEMBERSHIP);
+        $downmembershipGroups = implode(',', array_map(function ($val) {
+            return  sprintf("'%s'", $val['id']);
+        }, $downmembershipGroups));
+
+        $rootAlias = $queryBuilder->getRootAliases()[0];
+        $queryBuilder->distinct(true)
+                     ->andWhere("$rootAlias.target in ($downmembershipGroups)")
+                     ->join("$rootAlias.folderTpl", "t")->andWhere("t.id=$rootAlias.folderTpl")
+                     ->join("$rootAlias.questionnaires", "q")->andWhere("q.folder=$rootAlias.id");
+
+        if ($allFolderTpls === false) {
+            $queryBuilder->join("$rootAlias.calendars", "c")->andWhere("c.valid=1");
+        }
+
         $state = stateableEntity::getStateDraft();
         if ($this->operationName === "getdraft") {
-            $queryBuilder->andWhere(sprintf("%s.createdBy='%s'", $rootAlias, $currentUserID));
-
+            $queryBuilder->andWhere("$rootAlias.createdBy='$currentUserName'");
         } else {
-            $state = stateableEntity::getStateSubmitted();
+//            $userRoles = implode(
+//                ', ',
+//                array_map(function ($val) {
+//                    return sprintf("'%s'", $val);
+//                }, $this->getUser()->getRoles()));
 
+            $state = stateableEntity::getStateSubmitted();
             // user must have *at least* a rigth on the folder to know its existence
-            $queryBuilder->join("App:TplFolderPermission", "p");
-            $queryBuilder->andWhere(sprintf("p.tplFolder=t.id"));
-//            $queryBuilder->andWhere(sprintf("p.right='%s'", TplFolderPermission::RIGHT_VIEW));
+            $queryBuilder->join("t.permissions", "p");
+//            $queryBuilder->andWhere(sprintf("p.right='%s'", FolderTplPermission::RIGHT_VIEW));
         }
 
-        $queryBuilder->join("App:Questionnaire", "q");
-        $queryBuilder->andWhere(sprintf("q.folder=%s.id", $rootAlias));
-
-        $queryBuilder->andWhere(sprintf("%s.state='%s'", $rootAlias, $state));
+        $queryBuilder->andWhere("${rootAlias}.state='${state}'");
+        $sql = $queryBuilder->getQuery()->getSQL();
 
         /*
          * use this to get sql query : $sql=$queryBuilder->getQuery()->getSQL();
+        $sql = $queryBuilder->getQuery()->getSQL();
          */
     }
 
     /**
      *
-     * Add filter for TplFolder
-     *      filter only submitted TplFolder
-     *      filter only creatable TplFolder for user (user must have RIGHT_CREATE on this object =>
-     *          table TplFolderPermission give ROLE/RIGHT/TplFolder)
+     * Add filter for Folder
+     *      filter only submitted Folder
+     *      filter only creatable Folder for user (user must have RIGHT_CREATE on this object =>
+     *          table FolderTplPermission give ROLE/RIGHT/Folder)
      *
      * @param \Doctrine\ORM\QueryBuilder $queryBuilder
      * @param string                     $resourceClass
      */
-    private function tplFolderAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
+    private function folderTplAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
     {
+
+        $permissions_right = '';
+        if (!empty($this->getRequest()->get('permissions_right'))) {
+            $permissions_right = strtoupper($this->getRequest()->get('permissions_right'));
+        }
+
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $userRoles = implode(
             ', ',
             array_map(function ($val) {
                 return sprintf("'%s'", $val);
-            }, $this->user->getRoles()));
+            }, $this->getUser()->getRoles()));
 
-        $queryBuilder->join("App:Calendar", "c");
-        $queryBuilder->join("App:TplFolderCalendar", "fc");
-        $queryBuilder->andWhere(sprintf("fc.tplFolder=%s.id", $rootAlias));
-        $queryBuilder->andWhere(sprintf("c.id=fc.calendar"));
-        if ($this->allTplFolders === false) {
-            $queryBuilder->andWhere(sprintf("c.valid=1"));
+        $queryBuilder->distinct(true)
+                     ->andWhere(sprintf("%s.state='%s'", $rootAlias,
+                                        stateableEntity::getStateSubmitted()));
+        $allFolderTpls = true;
+        if (!empty($this->getRequest()->get('all'))) {
+            $allFolderTpls = strtolower($this->getRequest()->get('all')) === 'true' ?? false;
         }
-
-        // user must have *at least* a rigth on the tplFolder to know its existence
-        $queryBuilder->join("App:TplFolderPermission", "p");
-        $queryBuilder->andWhere(sprintf("p.tplFolder=%s.id", $rootAlias));
-        $queryBuilder->andWhere(sprintf('p.role in (%s)', $userRoles));
+        if ($allFolderTpls === false) {
+            $queryBuilder->join(Calendar::class, "c")->andWhere("c.valid=1");
+        }
+        // user must have *at least* a rigth on the folderTpl to know its existence
+        $queryBuilder->join(FolderTplPermission::class, "p")->andWhere(sprintf('p.role in (%s)', $userRoles));
         if (!empty($this->permissions_right)) {
             $queryBuilder->andWhere(sprintf("p.right='%s'", $this->permissions_right));
         }
 
-        $queryBuilder->andWhere(sprintf("%s.state='%s'", $rootAlias, stateableEntity::getStateSubmitted()));
-        $sql = $queryBuilder->getQuery()->getSQL();
-        $a   = 1;
         /*
          * use this to get sql query : $sql=$queryBuilder->getQuery()->getSQL();
+        $sql = $queryBuilder->getQuery()->getSQL();  $a   = 1;
          */
     }
 
     /**
      *
-     * add filters for Folder
+     * add filters for Folder template permission
      *
      * @param \Doctrine\ORM\QueryBuilder $queryBuilder
      * @param string                     $resourceClass
      */
-    private function tplFolderPermissionAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
+    private function folderTplPermissionAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
     {
-        $rootAlias = $queryBuilder->getRootAliases()[0];
         $userRoles = implode(
             ', ',
             array_map(function ($val) {
                 return sprintf("'%s'", $val);
-            }, $this->user->getRoles()));
-
+            }, $this->getUser()->getRoles()));
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder->andWhere("p.roles IN (:roles)")->setParameter('roles', $userRoles);
 
-//            $queryBuilder->andWhere(sprintf("p.role in '%s'", TplFolderPermission::RIGHT_VIEW));
+        $queryBuilder->andWhere("$rootAlias.roles IN (:roles)")->setParameter('roles', $userRoles);
+    }
+
+    /**
+     * filter tasks list on user (createdBy, responsible or informed)
+     *
+     * @param \Doctrine\ORM\QueryBuilder $queryBuilder
+     * @param string                     $resourceClass
+     */
+    private function taskAddWhere(QueryBuilder $queryBuilder, string $resourceClass): void
+    {
+        $rootAlias = $queryBuilder->getRootAliases()[0];
+
+        $userId = $this->getUser()->getUsername();
+        $queryBuilder->distinct(true)
+                     ->andWhere("$rootAlias.createdBy='$userId' OR $rootAlias.responsibleId='${userId}' OR $rootAlias.informedIds like '%${userId}%'");
+
         /*
          * use this to get sql query : $sql=$queryBuilder->getQuery()->getSQL();
+        $sql = $queryBuilder->getQuery()->getSQL();  $a   = 1;
          */
-
     }
 
     /**
@@ -210,7 +213,7 @@ final class PermissionsExtension implements QueryCollectionExtensionInterface, Q
         string $resourceClass,
         string $operationName = null
     ) {
-        if ($this->user === null) {
+        if ($this->getUser() === null) {
             return;
         }
 

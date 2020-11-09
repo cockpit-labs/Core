@@ -1,0 +1,421 @@
+[
+  {
+    "Calendar": [
+      {
+        "id": "calendar",
+        "start": "date:-1 weeks",
+        "end": "date:+1 weeks",
+        "cronStart": "* * * * 1",
+        "cronEnd": "* * * * 5",
+        "label": "Calendar",
+        "description": "Calendar for year 2020, with period = between monday and friday"
+      }
+    ]
+  },
+  {
+    "Block\\BlockTpl": [
+      {
+        "id": "block1",
+        "questionTpls": [
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 3,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 1,
+                "locale": null,
+                "label": "yes"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 2,
+                "locale": null,
+                "label": "no"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "lighting is complete and correct",
+            "description": null
+          },
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 2,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 0,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 1,
+                "locale": null,
+                "label": "yes"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 3,
+                "locale": null,
+                "label": "n/a"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 2,
+                "locale": null,
+                "label": "no"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "storehouse is clean and locked ",
+            "description": null
+          },
+          {
+            "alias": "range",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "range",
+              "min": 1,
+              "max": 10,
+              "step": 1
+            },
+            "validator": {
+            },
+            "position": 3,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                  "expression": "value"
+                },
+                "locale": null,
+                "label": ""
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "windows are compliant with merchandizing guide ",
+            "description": null
+          },
+          {
+            "alias": "select",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "list",
+              "multiselect": false
+            },
+            "validator": {
+            },
+            "position": 4,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 1,
+            "maxChoices": 1,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 1,
+                "locale": null,
+                "label": "All clean"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 2,
+                "locale": null,
+                "label": "Need some improvement"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 3,
+                "locale": null,
+                "label": "not acceptable"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "shelves are clean ",
+            "description": null
+          }
+        ],
+        "label": "STORE EVALUATION",
+        "description": "description STORE EVALUATION "
+      },
+      {
+        "id": "block2",
+        "questionTpls": [
+          {
+            "alias": "yesno",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "button"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 1,
+            "hasComment": true,
+            "maxPhotos": 3,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 1,
+                "locale": null,
+                "label": "ok"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 2,
+                "locale": null,
+                "label": "ko"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "merchandising is up-to-date ",
+            "description": null,
+            "children": [
+              {
+                "alias": "yesno",
+                "weight": 1,
+                "readRenderer": null,
+                "writeRenderer": {
+                  "component": "select",
+                  "display": "button"
+                },
+                "validator": {
+                },
+                "position": 2,
+                "hiddenLabel": false,
+                "mandatory": false,
+                "minChoices": 0,
+                "maxChoices": 1,
+                "hasComment": true,
+                "maxPhotos": 0,
+                "category": null,
+                "choiceTpls": [
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 1,
+                    "locale": null,
+                    "label": "yes"
+                  },
+                  {
+                    "document": null,
+                    "valueFormula": {
+                    },
+                    "position": 2,
+                    "locale": null,
+                    "label": "no"
+                  }
+                ],
+                "defaultChoice": null,
+                "trigger": {
+                  "expression": 1
+                },
+                "label": "storehouse is clean and locked ",
+                "description": null
+              }
+            ]
+          },
+          {
+            "alias": "select",
+            "weight": 1,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "select",
+              "display": "list",
+              "multiselect": true
+            },
+            "validator": {
+            },
+            "position": 2,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 1,
+            "maxChoices": 3,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "choiceTpls": [
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 1,
+                "locale": null,
+                "label": "learning module 1"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 2,
+                "locale": null,
+                "label": "learning module 2"
+              },
+              {
+                "document": null,
+                "valueFormula": {
+                },
+                "position": 3,
+                "locale": null,
+                "label": "learning module 3"
+              }
+            ],
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "the team is trained",
+            "description": null
+          },
+          {
+            "alias": "none",
+            "weight": 0,
+            "readRenderer": null,
+            "writeRenderer": {
+              "component": "photo"
+            },
+            "validator": {
+            },
+            "position": 1,
+            "hiddenLabel": false,
+            "mandatory": false,
+            "minChoices": 0,
+            "maxChoices": 0,
+            "hasComment": false,
+            "maxPhotos": 0,
+            "category": null,
+            "defaultChoice": null,
+            "trigger": null,
+            "label": "take picture of merch implementation ",
+            "description": null
+          }
+        ],
+        "label": "MERCHANDISING EVALUATION ",
+        "description": "description MERCHANDISING EVALUATION"
+      }
+    ]
+  },
+  {
+    "Questionnaire\\QuestionnaireTpl": [
+      {
+        "id": "TplQuestionnaire1",
+        "label": "Store Questionnaire",
+        "description": "description Store Questionnaire",
+        "blockTpls": ["localid:block1","localid:block2"]
+      }
+    ]
+  },
+  {
+    "Folder\\FolderTpl": [
+      {
+        "id": "TemplateFolder1",
+        "questionnaireTpls": [
+          "localid:TplQuestionnaire1"
+        ],
+        "folderTargets": [
+          {
+            "role": "CCEStore"
+          }
+        ],
+        "permissions": [
+          {
+            "right": "CREATE",
+            "role": "CCEStoreManager"
+          },
+          {
+            "right": "SUBMIT",
+            "role": "CCEStoreManager"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCEStoreManager"
+          },
+          {
+            "right": "VIEW",
+            "role": "CCECountryManager"
+          },
+          {
+            "right": "STATS",
+            "role": "CCECountryManager"
+          }
+        ],
+        "calendars": [
+          "localid:calendar"
+        ],
+        "minFolders": 1,
+        "maxFolders": 1,
+        "label": "Store visit",
+        "description": "Description of folder store visit",
+        "state": "SUBMITTED"
+      }
+    ]
+  }
+]

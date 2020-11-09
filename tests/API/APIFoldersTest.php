@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -25,58 +26,31 @@
 
 namespace App\Tests\API;
 
-use App\Entity\Folder;
-use App\Entity\QuestionChoice;
-use App\Entity\QuestionnairePDFMedia;
-use App\Entity\TplFolder;
-use App\Entity\UserMedia;
+use App\Entity\Choice\Choice;
+use App\Entity\Folder\Folder;
+use App\Entity\Folder\FolderTpl;
+use App\Entity\Media\QuestionnairePDFMedia;
+use App\Entity\Media\UserMedia;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 require_once('_ApiTest.php');
 
 class APIFoldersTest extends ApiTest
 {
-    private function addImage()
-    {
-        $imageFile = __DIR__ . '/GrumpyBear.png';
-        $this->setViewClient()->setNormalUser();
-        $this->preTest();
-
-        $response = $this->doGetRequest(UserMedia::class);
-
-        $uploadedFile = new UploadedFile(
-            $imageFile,
-            'GrumpyBear.'
-        );
-
-        $file     = ['foo' => $uploadedFile];
-        $response = $this->doUploadFileRequest(UserMedia::class, $file);
-        $this->assertResponseStatusCodeSame(400);
-
-        $file     = ['file' => $uploadedFile];
-        $response = $this->doUploadFileRequest(UserMedia::class, $file);
-        $this->assertResponseStatusCodeSame(201);
-
-        $this->assertMatchesResourceCollectionJsonSchema(UserMedia::class);
-        $this->assertNotEmpty(json_decode($response->getContent()));
-
-        $imageResponse = json_decode($response->getContent(), true);
-        $imageId       = $imageResponse['id'];
-        return $imageId;
-
-    }
-
     /**
-     * @group Default
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function testCreateFolder()
     {
-        // get TplFolder id
+        // get Folder id
         $this->setNormalUser()->setViewClient();
-        $TplFolderId = $this->getAnId(TplFolder::class);
+        $TplFolderId = $this->getAnId(FolderTpl::class);
         $this->assertTrue(Uuid::isValid($TplFolderId), "This is not an valid UUID");
-        $TplFolderIri = $this->findIriBy(TplFolder::class, ['id' => $TplFolderId]);
+        $TplFolderIri = $this->findIriBy(FolderTpl::class, ['id' => $TplFolderId]);
 
         // get a target
         $response = $this->doDirectRequest("GET", "/api/targets");
@@ -84,7 +58,7 @@ class APIFoldersTest extends ApiTest
         $targets  = json_decode($targets, true);
         $targetId = $targets[0]['id'];
         $data     = [
-            'tplFolder' => $TplFolderIri,
+            'folderTpl' => $TplFolderIri,
             'target'    => $targetId
         ];
         $response = $this->doPostRequest(Folder::class, $data);
@@ -96,41 +70,61 @@ class APIFoldersTest extends ApiTest
         // test modification
         foreach ($data['questionnaires'] as &$questionnaire) {
             foreach ($questionnaire['blocks'] as &$block) {
-                foreach ($block['questionAnswers'] as &$answer) {
+                foreach ($block['questions'] as &$question) {
                     // set first choice as answer
-                    if (isset($answer['question']['choices'][0])) {
-                        $choice            = $answer['question']['choices'][0];
-                        $answer['choices'] = [$this->getIri(QuestionChoice::class, $choice['id'])];
+                    if (isset($question['choices'][0])) {
+                        $choice              = $question['choices'][0];
+                        $question['choices'] = [$this->getIri(Choice::class, $choice['id'])];
                         // add a photo
                         for ($i = 0; $i <= random_int(0, 5); $i++) {
-                            $answer['photos'][$i] = $this->addImage();
+                            $question['photos'][$i] = $this->addImage(UserMedia::class, true);
                         }
-                    } else {
-                        $choice = "";
                     }
                 }
             }
+            // add tasks
+            for ($t = 1; $t <= rand(1, 10); $t++) {
+                $task          = [];
+                $countInformed = rand(1, 10);
+                for ($inf = 1; $inf <= $countInformed; $inf++) {
+                    $users              = ['audie', 'rosendo', 'heidi', 'marguerite', 'oh'];
+                    $task['informed'][] = $this->getAnUser($users[array_rand($users)]);
+                }
+                $task['responsible'] = $this->getAnUser('ay');
+                $task['action']      = $this->getFaker()->sentence(20);
+                $tasks[]             = $task;
+            }
+            $questionnaire['tasks'] = $tasks;
         }
-        $response = $this->doPatchRequest(Folder::class, $data['id'], $data);
+        $this->doPatchRequest(Folder::class, $data['id'], $data);
         $this->assertResponseStatusCodeSame(200);
+
+        // patch ith a bad user in tasks
+        $goodUser=$data['questionnaires'][0]['tasks'][0]['responsible']['username'];
+        $data['questionnaires'][0]['tasks'][0]['responsible']['username']='user.do.not.exists';
+        $this->doPatchRequest(Folder::class, $data['id'], $data);
+        $this->assertResponseStatusCodeSame(422);
+        $data['questionnaires'][0]['tasks'][0]['responsible']['username']=$goodUser;
 
         // try to update with another user
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doPatchRequest(Folder::class, $data['id'], $data);
+        $this->doPatchRequest(Folder::class, $data['id'], $data);
         $this->assertResponseStatusCodeSame(403);
 
         $this->setNormalUser()->setViewClient();
-        $response = $this->doPatchWithActionRequest(Folder::class, $data['id'], $data, 'submit');
+        $this->doPatchWithActionRequest(Folder::class, $data['id'], $data, 'submit');
         $this->assertResponseStatusCodeSame(200);
 
         // try to patch an SUBMITTED Folder
-        $response = $this->doPatchRequest(Folder::class, $data['id'], $data);
+        $this->doPatchRequest(Folder::class, $data['id'], $data);
         $this->assertResponseStatusCodeSame(403);
-
     }
 
     /**
-     * @group Default
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     public function testFolders()
     {
@@ -144,9 +138,8 @@ class APIFoldersTest extends ApiTest
             foreach ($result['questionnaires'] as $questionnaire) {
                 // load pdf
                 $pdfId = $this->getIdFromIri($questionnaire['pdf']);
-                $res=$this->doGetSubresourceRequest(QuestionnairePDFMedia::class, $pdfId, 'content');
+                $this->doGetSubresourceRequest(QuestionnairePDFMedia::class, $pdfId, 'content');
             }
-
         }
     }
 }

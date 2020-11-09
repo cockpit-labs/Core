@@ -3,18 +3,19 @@ parameters:
   CCE_adminclient: 'cockpitadmin'   # KeyCloak client id for admin module
   CCE_coreclient: 'cockpitcore'     # KeyCloak client id for core module
   CCE_KEYCLOAKURL: '%env(resolve:KEYCLOAKURL)%'
-  CCE_KEYCLOAKSECRET: '%env(resolve:JWT_PASSPHRASEFILE)%'
-  CCE_KEYCLOAKAUTHURL: '%env(resolve:KEYCLOAKAUTHURL)%'
+  CCE_KEYCLOAKSECRET: '%env(resolve:JWT_PASSPHRASE)%'
   CCE_KEYCLOAKREALM: '%env(KEYCLOAKREALM)%'
-  CCE_KEYCLOAKCONTAINER: '%env(KEYCLOAK_CONTAINER)%'
+  CCE_KEYCLOAKCLIENTAUTHURL: '%env(KEYCLOAKCLIENTAUTHURL)%'
+  CCE_KEYCLOAK_smtpServer: '%env(KEYCLOAK_smtpServer)%'
+  CCE_EMAILFROM: '%env(EMAILFROM)%'
   CCE_APIURL: '%env(APIURL)%'
-  CCE_APISERVER: '%env(APISERVER)%'
-  CCE_DEFAULTURL: '%env(DEFAULTURL)%'
+  CCE_BASEURL: '%env(BASEURL)%'
   CCE_GOTENBERGURL: '%env(GOTENBERGURL)%'
   JWT_SECRET_KEY: '%env(resolve:JWT_SECRET_KEY)%'
   JWT_PUBLIC_KEY: '%env(resolve:JWT_PUBLIC_KEY)%'
-  JWT_PASSPHRASEFILE: '%env(resolve:JWT_PASSPHRASEFILE)%'
   JWT_PASSPHRASE: '%env(resolve:JWT_PASSPHRASE)%'
+
+  container.dumper.inline_factories: true
 
 services:
   _defaults:
@@ -29,7 +30,7 @@ services:
 
   App\Controller\:
     resource: '../src/Controller'
-    tags: ['controller.service_arguments']
+    tags: [ 'controller.service_arguments' ]
 
 
   CronExpressionGenerator\FakerProvider:
@@ -38,3 +39,8 @@ services:
 
   #  manualy add flysystem interface since OneupFlysystemBundle doesn't correctly configure it's services to use Symfoyny's autowiring correctly
   League\Flysystem\FilesystemInterface: "@oneup_flysystem.mediafs_filesystem"
+
+  App\Swagger\SwaggerDecorator:
+    decorates: 'api_platform.swagger.normalizer.api_gateway'
+    arguments: [ '@App\Swagger\SwaggerDecorator.inner' ]
+    autoconfigure: false

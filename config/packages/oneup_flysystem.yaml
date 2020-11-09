@@ -3,7 +3,7 @@ oneup_flysystem:
   adapters:
     media_adapter:
       local:
-        directory: '%kernel.project_dir%/var/storage/default'
+        directory: '%kernel.project_dir%/var/storage/%kernel.environment%'
         lazy: true
         permissions:
           dir:

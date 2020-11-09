@@ -1,51 +1,15 @@
 ##################################
-App\Entity\TplBlock:
+App\Entity\Folder\FolderTpl:
   attributes:
     denormalization_context:
       groups:
-        - 'TplBlock:Update'
-        - 'Label'
-        - 'Description'
-
-    normalization_context:
-      groups:
-        - 'TplBlock:Read'
-        - 'Resource'
-        - 'Label'
-        - 'Description'
-      preserve_empty_objects: true
-      skip_null_values: false
-
-  collectionOperations:
-    get:
-      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
-    post:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
-
-  itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
-    get:
-      security: is_granted('ROLE_CCEUser')
-      security_message: 'Sorry, but you are not authorized.'
-    patch:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
-
-##################################
-App\Entity\TplFolder:
-  attributes:
-    denormalization_context:
-      groups:
-        - 'TplFolder:Update'
+        - 'FolderTpl:Update'
         - 'Label'
         - 'Description'
         - 'State'
 
-    output: App\Entity\TplFolder
+    output: App\Entity\Folder\FolderTpl
+    input: App\Entity\Folder\FolderTpl
 
   collectionOperations:
     get:
@@ -53,28 +17,19 @@ App\Entity\TplFolder:
       security_message: 'Sorry, but you are not authorized.'
       normalization_context:
         groups:
-          - 'TplFolder:Read'
+          - 'FolderTpl:Read'
           - 'Resource'
           - 'Label'
           - 'Description'
         preserve_empty_objects: true
         skip_null_values: false
-#      openapi_context:
-#        parameters:
-#          - name: all
-#            in: query
-#            description: 'all templates, even out of period'
-#            required: false
-#            schema:
-#              type: bool
-#              default: false
     post:
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
 
     getexpectation:
       method: GET
-      path: /tpl_folders/expectation
+      path: /folder_tpls/expectation
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
       openapi_context:
@@ -95,7 +50,7 @@ App\Entity\TplFolder:
 
     all:
       method: GET
-      path: /tpl_folders/all
+      path: /folder_tpls/all
       security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
       openapi_context:
@@ -103,7 +58,7 @@ App\Entity\TplFolder:
 
     periods:
       method: GET
-      path: /tpl_folders/periods
+      path: /folder_tpls/periods
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
       openapi_context:
@@ -125,7 +80,7 @@ App\Entity\TplFolder:
           - 'Resource'
           - 'Label'
           - 'Description'
-          - 'TplFolder:Periods'
+          - 'FolderTpl:Periods'
         skip_null_values: false
 
   itemOperations:
@@ -137,7 +92,7 @@ App\Entity\TplFolder:
       security_message: 'Sorry, but you are not authorized.'
       normalization_context:
         groups:
-          - 'TplFolder:Read'
+          - 'FolderTpl:Read'
           - 'Resource'
           - 'Label'
           - 'Description'
@@ -148,7 +103,7 @@ App\Entity\TplFolder:
       security_message: 'Sorry, but you are not authorized.'
     getexpectation:
       method: GET
-      path: /tpl_folders/{id}/expectation
+      path: /folder_tpls/{id}/expectation
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
       openapi_context:
@@ -169,10 +124,10 @@ App\Entity\TplFolder:
           - 'Resource'
           - 'Label'
           - 'Description'
-          - 'TplFolder:Expectation'
+          - 'FolderTpl:Expectation'
     periods:
       method: GET
-      path: /tpl_folders/{id}/periods
+      path: /folder_tpls/{id}/periods
       security: is_granted('ROLE_CCEDashboard')
       security_message: 'Sorry, but you are not authorized.'
       openapi_context:
@@ -193,18 +148,18 @@ App\Entity\TplFolder:
           - 'Resource'
           - 'Label'
           - 'Description'
-          - 'TplFolder:Periods'
+          - 'FolderTpl:Periods'
 
 ##################################
-App\Entity\TplFolderPermission:
+App\Entity\Folder\FolderTplPermission:
   attributes:
     denormalization_context:
       groups:
-        - 'TplFolderPermission:Update'
+        - 'FolderTplPermission:Update'
 
     normalization_context:
       groups:
-        - 'TplFolderPermission:Read'
+        - 'FolderTplPermission:Read'
         - 'Resource'
       preserve_empty_objects: true
       skip_null_values: true
@@ -228,24 +183,21 @@ App\Entity\TplFolderPermission:
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
 
-
-
 ##################################
-App\Entity\TplQuestion:
+App\Entity\Folder\FolderTplQuestionnaireTpl:
   attributes:
     denormalization_context:
       groups:
-        - 'TplQuestion:Update'
+        - 'FolderTplQuestionnaireTpl:Update'
         - 'Label'
         - 'Description'
 
     normalization_context:
       groups:
-        - 'TplQuestion:Read'
+        - 'FolderTplQuestionnaireTpl:Read'
         - 'Resource'
         - 'Label'
         - 'Description'
-        - 'Score'
       preserve_empty_objects: true
       skip_null_values: false
 
@@ -269,17 +221,17 @@ App\Entity\TplQuestion:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\TplQuestionnaire:
+App\Entity\Questionnaire\QuestionnaireTpl:
   attributes:
     denormalization_context:
       groups:
-        - 'TplQuestionnaire:Update'
+        - 'QuestionnaireTpl:Update'
         - 'Label'
         - 'Description'
 
     normalization_context:
       groups:
-        - 'TplQuestionnaire:Read'
+        - 'QuestionnaireTpl:Read'
         - 'Resource'
         - 'Label'
         - 'Description'
@@ -291,10 +243,12 @@ App\Entity\TplQuestionnaire:
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
-      output: App\Entity\TplQuestionnaire
+      output: App\Entity\Questionnaire\QuestionnaireTpl
     post:
+      method: POST
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
+      input: App\Entity\Questionnaire\QuestionnaireTpl
 
   itemOperations:
     delete:
@@ -303,25 +257,131 @@ App\Entity\TplQuestionnaire:
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
-      output: App\Entity\TplQuestionnaire
+      output: App\Entity\Questionnaire\QuestionnaireTpl
     update:
       method: PATCH
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
-      input: App\Entity\TplQuestionnaire
+      input: App\Entity\Questionnaire\QuestionnaireTpl
 
 ##################################
-App\Entity\TplQuestionnaireBlock:
+App\Entity\Questionnaire\QuestionnaireTplBlockTpl:
   attributes:
     denormalization_context:
       groups:
-        - 'TplQuestionnaireBlock:Update'
+        - 'QuestionnaireTplBlockTpl:Update'
         - 'Label'
         - 'Description'
 
     normalization_context:
       groups:
-        - 'TplQuestionnaireBlock:Read'
+        - 'QuestionnaireTplBlockTpl:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+
+##################################
+App\Entity\Block\BlockTpl:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'BlockTpl:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'BlockTpl:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+        - 'Score'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+
+
+##################################
+App\Entity\Question\QuestionTpl:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'QuestionTpl:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'QuestionTpl:Read'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
+        - 'Score'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    post:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+    patch:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Choice\ChoiceTpl:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'ChoiceTpl:Update'
+        - 'Label'
+        - 'Description'
+
+    normalization_context:
+      groups:
+        - 'ChoiceTpl:Read'
         - 'Resource'
         - 'Label'
         - 'Description'
@@ -346,3 +406,4 @@ App\Entity\TplQuestionnaireBlock:
     patch:
       security: is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
+

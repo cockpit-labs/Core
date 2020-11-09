@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -38,7 +39,7 @@ trait scorableEntity
 {
     /**
      * @var int|null
-     * @ORM\Column(name="score", type="integer", nullable=true)
+     * @ORM\Column(name="score", type="float", nullable=true)
      * @Groups({"Score"})
      */
     private $score = null;
@@ -87,6 +88,27 @@ trait scorableEntity
     {
         $this->scoreDivider = $scoreDivider;
 
+        return $this;
+    }
+
+    public function processScore(): ?self
+    {
+        // calcul this object score
+        if (method_exists($this, 'getScoreValue')) {
+            $this->getScoreValue();
+        }
+        // if there is child objects for this object
+        if (method_exists($this, 'getChildEntities')) {
+            foreach ($this->getChildEntities() as $childEntity) {
+                if (method_exists($childEntity, 'getScore')
+                    && method_exists($childEntity, 'getScoreDivider')
+                    && method_exists($childEntity, 'processScore')) {
+                    $childEntity->processScore();
+                    $this->setScoreDivider($this->getScoreDivider() + $childEntity->getScoreDivider());
+                    $this->setScore($this->getScore() + $childEntity->getScore());
+                }
+            }
+        }
         return $this;
     }
 }

@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -25,8 +26,7 @@
 
 namespace App\Tests\API;
 
-use App\Entity\TplQuestionnaire;
-use App\Entity\TplQuestionnaireBlock;
+use App\Entity\Questionnaire\QuestionnaireTpl;
 
 require_once('_ApiTest.php');
 
@@ -37,7 +37,7 @@ class APITplQuestionnairesTest extends ApiTest
      */
     public function testCommon()
     {
-        $this->commonTest(TplQuestionnaire::class);
+        $this->commonTest(QuestionnaireTpl::class);
     }
 
     /**
@@ -45,9 +45,9 @@ class APITplQuestionnairesTest extends ApiTest
      */
     public function testTplQuestionnaires()
     {
-        $response = $this->doGetRequest(TplQuestionnaire::class);
+        $response = $this->doGetRequest(QuestionnaireTpl::class);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplQuestionnaire::class);
+        $this->assertMatchesResourceCollectionJsonSchema(QuestionnaireTpl::class);
         $this->assertNotEmpty(json_decode($response->getContent()));
         foreach (json_decode($response->getContent(), true) as $result) {
             $this->assertNotEmpty($result);
@@ -57,25 +57,41 @@ class APITplQuestionnairesTest extends ApiTest
     /**
      * @group Default
      */
-    public function testTplQuestionnairesUpdateBlocks()
+//    public function testTplQuestionnairesUpdateBlocks()
+//    {
+//        $this->setAdminClient()->setAdminUser();
+//        $response = $this->doGetRequest(QuestionnaireTpl::class);
+//        $this->assertResponseStatusCodeSame(200);
+//        $this->assertMatchesResourceCollectionJsonSchema(QuestionnaireTpl::class);
+//        $questionnaires = json_decode($response->getContent(),true);
+//        foreach ($questionnaires as &$questionnaire) {
+//
+//            // reverse blocks position
+//            foreach ($questionnaire['tplBlocks'] as &$tplBlock) {
+//                $tplBlock['label']="test tplBlock77";
+//                $tplBlock['position']+=77;
+//                unset($tplBlock['tplQuestions']);
+//            }
+//            $response = $this->doPatchRequest(QuestionnaireTpl::class, $questionnaire['id'],$questionnaire);
+//        }
+//
+//    }
+    public function testTplQuestionnairesUpdateLabel()
     {
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doGetRequest(TplQuestionnaire::class);
+        $response = $this->doGetRequest(QuestionnaireTpl::class);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplQuestionnaire::class);
+        $this->assertMatchesResourceCollectionJsonSchema(QuestionnaireTpl::class);
         $questionnaires = json_decode($response->getContent(),true);
         foreach ($questionnaires as &$questionnaire) {
-
-            // reverse blocks position
-            unset($questionnaire['tplQuestionnairesBlock']);
-            foreach ($questionnaire['tplBlocks'] as &$tplBlock) {
-                $tplBlock['label']="test tplBlock77";
-                $tplBlock['position']+=77;
-                unset($tplBlock['tplQuestions']);
-            }
-            $response = $this->doPatchRequest(TplQuestionnaire::class, $questionnaire['id'],$questionnaire);
+            $testQuestionnaire['id']=$questionnaire['id'];
+            $testQuestionnaire['label']='updated label';
+            $response = $this->doPatchRequest(QuestionnaireTpl::class, $testQuestionnaire['id'], $testQuestionnaire);
+            $updatedQuestionnaire = json_decode($response->getContent(), true);
+            unset($questionnaire['label']);
+            unset($updatedQuestionnaire['label']);
+            $this->assertEquals($questionnaire, $updatedQuestionnaire);
         }
-
     }
     /**
      * @group Default
@@ -83,24 +99,24 @@ class APITplQuestionnairesTest extends ApiTest
     public function testTplQuestionnairesAddBlock()
     {
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doGetRequest(TplQuestionnaire::class);
+        $response = $this->doGetRequest(QuestionnaireTpl::class);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplQuestionnaire::class);
+        $this->assertMatchesResourceCollectionJsonSchema(QuestionnaireTpl::class);
         $questionnaires = json_decode($response->getContent(), true);
         foreach ($questionnaires as &$questionnaire) {
-            foreach ($questionnaire['tplBlocks'] as &$tplBlock) {
+            foreach ($questionnaire['blockTpls'] as &$tplBlock) {
                 unset($tplBlock['tplQuestions']);
             }
-            unset($questionnaire['tplQuestionnairesBlock']);
+            unset($questionnaire['questionnaireTplsBlockTpls']);
             // add block
             $newBlock['label']=$this->getFaker()->word();
             $newBlock['position']=777;
 
-            $questionnaire['tplBlocks'][]=$newBlock;
-            $response = $this->doPatchRequest(TplQuestionnaire::class, $questionnaire['id'],$questionnaire);
+            $questionnaire['blockTpls'][]=$newBlock;
+            $response = $this->doPatchRequest(QuestionnaireTpl::class, $questionnaire['id'], $questionnaire);
         }// read again
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doGetRequest(TplQuestionnaire::class);
+        $response = $this->doGetRequest(QuestionnaireTpl::class);
 
 
     }

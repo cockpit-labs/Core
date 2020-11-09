@@ -1,5 +1,5 @@
 ##################################
-App\Entity\Block:
+App\Entity\Block\Block:
   attributes:
     denormalization_context:
       groups:
@@ -30,14 +30,8 @@ App\Entity\Block:
           - 'Description'
           - 'Score'
         skip_null_values: false
-    post:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
 
   itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
     get:
       security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
@@ -133,9 +127,8 @@ App\Entity\Category:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\Folder:
+App\Entity\Folder\Folder:
   attributes:
-    input: App\Entity\Folder
 
     normalization_context:
       groups:
@@ -172,19 +165,17 @@ App\Entity\Folder:
           - 'Label'
           - 'Description'
           - 'Score'
-        skip_null_values: false
     create:
       method: POST
+      input: App\Entity\Folder\Folder
       denormalization_context:
         groups:
           - 'Folder:Create'
+          - 'Folder:Read'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
 
   itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEUser')
-      security_message: 'Sorry, but you are not authorized.'
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
@@ -203,13 +194,16 @@ App\Entity\Folder:
           - 'Score'
     update:
       method: PATCH
+      input: App\Entity\Folder\Folder
       denormalization_context:
         groups:
+          - 'Folder:Read'
           - 'Folder:Update'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
     submit:
       method: PATCH
+      input: App\Entity\Folder\Folder
       path: /folders/{id}/submit
       denormalization_context:
         groups:
@@ -217,19 +211,20 @@ App\Entity\Folder:
       normalization_context:
         groups:
           - 'Submit'
+          - 'label'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\QuestionAnswer:
+App\Entity\Question\Question:
   attributes:
     denormalization_context:
       groups:
-        - 'QuestionAnswer:Update'
+        - 'Question:Update'
 
     normalization_context:
       groups:
-        - 'QuestionAnswer:Read'
+        - 'Question:Read'
         - 'Resource'
         - 'Label'
         - 'Description'
@@ -240,14 +235,8 @@ App\Entity\QuestionAnswer:
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
-    post:
-      security: is_granted('ROLE_CCEUser')
-      security_message: 'Sorry, but you are not authorized.'
 
   itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEUser')
-      security_message: 'Sorry, but you are not authorized.'
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
@@ -256,15 +245,15 @@ App\Entity\QuestionAnswer:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\AnswerValue:
+App\Entity\Answer\Answer:
   attributes:
     denormalization_context:
       groups:
-        - 'AnswerValue:Update'
+        - 'Answer:Update'
 
     normalization_context:
       groups:
-        - 'AnswerValue:Read'
+        - 'Answer:Read'
       preserve_empty_objects: true
       skip_null_values: false
 
@@ -288,15 +277,15 @@ App\Entity\AnswerValue:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\QuestionChoice:
+App\Entity\Choice\Choice:
   attributes:
     denormalization_context:
       groups:
-        - 'QuestionChoice:Update'
+        - 'Choice:Update'
 
     normalization_context:
       groups:
-        - 'QuestionChoice:Read'
+        - 'Choice:Read'
         - 'Resource'
       preserve_empty_objects: true
       skip_null_values: false
@@ -305,14 +294,8 @@ App\Entity\QuestionChoice:
     get:
       security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
       security_message: 'Sorry, but you are not authorized.'
-    post:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
 
   itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEAdmin')
-      security_message: 'Sorry, but you are not authorized.'
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
@@ -321,12 +304,17 @@ App\Entity\QuestionChoice:
       security_message: 'Sorry, but you are not authorized.'
 
 ##################################
-App\Entity\Questionnaire:
+App\Entity\Questionnaire\Questionnaire:
   attributes:
+    output: App\Entity\Questionnaire\Questionnaire
+    input: App\Entity\Questionnaire\Questionnaire
     denormalization_context:
       groups:
         - 'Questionnaire:Update'
         - 'Score'
+        - 'Resource'
+        - 'Label'
+        - 'Description'
 
     normalization_context:
       groups:
@@ -362,9 +350,6 @@ App\Entity\Questionnaire:
         skip_null_values: false
 
   itemOperations:
-    delete:
-      security: is_granted('ROLE_CCEUser')
-      security_message: 'Sorry, but you are not authorized.'
     get:
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'
@@ -380,6 +365,31 @@ App\Entity\Questionnaire:
       normalization_context:
         groups:
           - 'Resource'
+    sendpdf:
+      method: GET
+      path: /questionnaires/{id}/sendpdf
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+      openapi_context:
+        summary: 'Send questionnaire PDF'
+        description: ''
+        parameters:
+          - name: recipients
+            in: query
+            description: 'list of recipients'
+            required: true
+            minItems: 1
+            maxItems: 5
+            style: deepObject
+            schema:
+              type: array
+              collectionFormat: pipes
+              items:
+                type: string
+      normalization_context:
+        groups:
+          - 'Resource'
+
     getstat:
       method: GET
       path: /questionnaires/{id}/stats
@@ -397,5 +407,60 @@ App\Entity\Questionnaire:
           - 'Description'
           - 'Score'
     patch:
+      security: is_granted('ROLE_CCEUser')
+      security_message: 'Sorry, but you are not authorized.'
+
+##################################
+App\Entity\Task:
+  attributes:
+    denormalization_context:
+      groups:
+        - 'User:Read'
+        - 'Task:Update'
+
+    normalization_context:
+      groups:
+        - 'User:Read'
+        - 'Task:Read'
+        - 'State'
+        - 'Resource'
+        - 'Blame'
+        - 'Timestamp'
+      preserve_empty_objects: true
+      skip_null_values: false
+
+    input: App\Entity\Task
+    output: App\Entity\Task
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    create:
+      method: POST
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    delete:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    get:
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    update:
+      method: PATCH
+      security: is_granted('ROLE_CCEUser') or is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+    done:
+      method: PATCH
+      path: /tasks/{id}/done
+      denormalization_context:
+        groups:
+          - 'none'
+      normalization_context:
+        groups:
+          - 'Done'
+          - 'label'
       security: is_granted('ROLE_CCEUser')
       security_message: 'Sorry, but you are not authorized.'

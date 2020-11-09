@@ -24,7 +24,7 @@ framework:
         type: 'method'
         property: 'state'
       supports:
-        - App\Entity\Folder
+        - App\Entity\Folder\Folder
       initial_marking: draft
       places:
         - draft

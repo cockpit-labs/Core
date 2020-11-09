@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,29 +27,52 @@
 namespace App\DataTransformer;
 
 use ApiPlatform\Core\DataTransformer\DataTransformerInterface;
-use App\DataProvider\KeycloakDataProvider;
-use App\Entity\AnswerValue;
-use App\Entity\Block;
-use App\Entity\Folder;
-use App\Entity\MediaOwner;
-use App\Entity\QuestionAnswer;
-use App\Entity\Questionnaire;
-use App\Entity\QuestionnairePDFMedia;
-use App\Entity\TplBlock;
-use App\Entity\TplQuestion;
-use App\Entity\TplQuestionnaire;
+use App\DataProvider\CommonDataProvider;
+use App\Entity\Folder\Folder;
+use App\Entity\Media\Media;
+use App\Entity\Media\MediaOwner;
+use App\Entity\Media\QuestionnairePDFMedia;
+use App\Entity\Media\UserMedia;
+use App\Entity\User;
 use App\Service\CCETools;
 use App\Traits\stateableEntity;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use TheCodingMachine\Gotenberg\Client;
+use TheCodingMachine\Gotenberg\DocumentFactory;
+use TheCodingMachine\Gotenberg\HTMLRequest;
+use TheCodingMachine\Gotenberg\Request;
+use Twig\TwigFunction;
 
-final class FolderDataTransformer extends KeycloakDataProvider implements DataTransformerInterface
+final class FolderDataTransformer extends CommonDataProvider implements DataTransformerInterface
 {
 
     private $context;
-    private $expressionEngine;
 
+    /**
+     * @param \App\Entity\Media\Media $media
+     * @param array                   $owners
+     */
+    private function addMediaOwner(?Media $media, array $owners)
+    {
+        if (empty($media)) {
+            return;
+        }
+        $repo = $this->getEntityManager()->getRepository(MediaOwner::class);
+        foreach ($owners as $owner) {
+            $mediaOwner = new MediaOwner();
+            $mediaOwner->setMedia($media);
+            $mediaOwner->setOwner($owner);
+            if (!$repo->exists($mediaOwner)) {
+                $this->getEntityManager()->persist($mediaOwner);
+            }
+        }
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param $folder
+     */
     private function checkGrants($folder): void
     {
         if ($folder->getCreatedBy() !== null
@@ -57,135 +81,121 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
         }
     }
 
-    private function createAnswer(TplQuestion $question): QuestionAnswer
+    /**
+     * @param \App\Entity\Folder\Folder $data
+     *
+     * @return \App\Entity\Folder\Folder
+     * @throws \Exception
+     */
+    private function createFolder(Folder $data): Folder
     {
-
-        $answer = new QuestionAnswer();
-        $answer->setWeight($question->getWeight());
-        $q = $this->getNormalizer()->normalize($question, null, $this->context);
-        $answer->setQuestion($q);
-        foreach ($question->getChildren() as $child) {
-            $childrenAnswer = $this->createAnswer($child);
-            $childrenAnswer->setParent($answer);
-            $answer->addChild($childrenAnswer);
-        }
-
-        return $answer;
-    }
-
-    private function createBlock(TplBlock $tplBlock): Block
-    {
-        $block = new Block();
-        $block->setDescription($tplBlock->getDescription());
-        $block->setLabel($tplBlock->getLabel());
-        foreach ($tplBlock->getTplQuestions() as $question) {
-            $this->getEntityManager()->initializeObject($question);
-            $answer = $this->createAnswer($question);
-            $block->addQuestionAnswer($answer);
-        }
-        return $block;
-    }
-
-    private function createFolder(Folder &$folder): Folder
-    {
-
-        $tplFolder = $folder->getTplFolder();
-        $this->getEntityManager()->initializeObject($tplFolder);
-
-        // Set template description if no description provided
-        if (!empty($tplFolder->getDescription())) {
-            $folder->setDescription($tplFolder->getDescription());
-        }
-
-        // get min and max dates from calendars
-        foreach ($tplFolder->getCalendars() as $calendar) {
-            $this->getEntityManager()->initializeObject($calendar);
-            $folder->setPeriodEnd(max($calendar->getPeriodEnd(), $folder->getPeriodEnd()));
-            // start cannot be null, so force it to first end value, if it is null
-            $folder->setPeriodStart($folder->getPeriodStart() ?? $folder->getPeriodEnd());
-            $folder->setPeriodStart(min($calendar->getPeriodStart(), $folder->getPeriodStart()));
-        }
-
-        // Set template label if no label provided
-        if (!empty($tplFolder->getLabel())) {
-            $folder->setLabel($tplFolder->getLabel());
-        }
-
-        $folder->setCreatedBy($this->getUser()->getUsername());
-        $folder->setUpdatedBy($this->getUser()->getUsername());
-
-        $tplQuestionnaires = $tplFolder->getTplQuestionnaires();
-        // instanciate questionnaires for this new folder
-        foreach ($tplQuestionnaires as $questionnaireTmpl) {
-            // instanciate the questionnaire and add it to the new folder
-            $this->getEntityManager()->initializeObject($questionnaireTmpl);
-            $questionnaire = $this->createQuestionnaire($questionnaireTmpl);
-            $folder->addQuestionnaire($questionnaire);
-        }
-
+        $target = $this->getKeycloakConnector()->getGroup($data->getTarget());
         // get target parent
-        $target          = $this->getKeycloakConnector()->getGroup($folder->getTarget());
         $parentTargets   = array_map(function ($val) {
             return sprintf("%s", $val['id']);
         }, $this->getKeycloakConnector()->getParentGroups($target));
         $parentTargets[] = $target['id'];
-        $folder->setParentTargets(implode(
-                                      '/',
-                                      $parentTargets));
+
+        $folderTpl = $data->getFolderTpl();
+        $this->getEntityManager()->initializeObject($folderTpl);
+
+        $folder = $folderTpl->instantiate();
+        $folder->setCreatedBy($this->getUser()->getUsername())
+               ->setUpdatedBy($this->getUser()->getUsername())
+               ->setTarget($data->getTarget())
+               ->setParentTargets(implode('/', $parentTargets));
 
         return $folder;
     }
 
-    private function createQuestionnaire(TplQuestionnaire $tplQuestionnaire): Questionnaire
+    /**
+     * @param \App\Entity\Folder\Folder $folder
+     *
+     * @throws \League\Flysystem\FileNotFoundException
+     * @throws \Safe\Exceptions\FilesystemException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws \TheCodingMachine\Gotenberg\ClientException
+     * @throws \TheCodingMachine\Gotenberg\RequestException
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    private function generatePDF(Folder $folder)
     {
-        $questionnaire = new Questionnaire();
-        if (!empty($tplQuestionnaire->getDescription())) {
-            $questionnaire->setDescription($tplQuestionnaire->getDescription());
-        }
-        if (!empty($tplQuestionnaire->getLabel())) {
-            $questionnaire->setLabel($tplQuestionnaire->getLabel());
-        }
-        $questionnaire->setTplQuestionnaire($tplQuestionnaire);
 
-        $tplBlocks = $tplQuestionnaire->getTplQuestionnaireBlocks();
-        foreach ($tplBlocks as $tplBlockAssoc) {
-            $this->getEntityManager()->initializeObject($tplBlockAssoc);
-            $tplBlock   = $tplBlockAssoc->getTplBlock();
-            $tplBlockId = $tplBlock->getId();
-            $tplBlock   = $this->getEntityManager()->find(TplBlock::class, $tplBlockId);
-            $block      = $this->createBlock($tplBlock);
-            $block->setQuestionnaire($questionnaire);
-            $block->setPosition($tplBlockAssoc->getPosition());
-            $block->setTplBlockId($tplBlockId);
-            $questionnaire->addBlock($block);
-        }
-        return $questionnaire;
-    }
+        $selectedChoices = new TwigFunction('getSelectedChoices', function ($question) {
+            $selectedChoicesLabels = [];
+            if (!empty($question['answers'])) {
+                $selectedChoicesLabels = array_map(function ($answer) {
+                    return $answer['choice']['label'] ?? '';
+                }, $question['answers']);
+            }
 
-    private function generatePDF(Folder &$folder)
-    {
-        foreach ($folder->getQuestionnaires() as &$questionnaire) {
+            return $selectedChoicesLabels;
+        });
+
+        $this->getTwig()->addFunction($selectedChoices);
+
+        $photoLibs = [];
+        $photoIri  = str_replace('/', '\/', $this->getIriService()->getIriFromResourceClass(UserMedia::class) . '/');
+        foreach ($folder->getQuestionnaires() as $questionnaire) {
+            // check all photos in answers
+            foreach ($questionnaire->getBlocks() as $block) {
+                foreach ($block->getQuestions() as $question) {
+                    foreach ($question->getAnswers() as $answer) {
+                        if (!empty($answer->getMedia())) {
+                            $photoLibs[$photoIri . $answer->getMedia()->getId()] =
+                                base64_encode($this->getMediaFS()->read($answer->getMedia()->getFileName()));
+                        }
+                    }
+                    foreach ($question->getPhotos() as $photo) {
+                        $photoLibs[$photoIri . $photo->getId()] =
+                            base64_encode($this->getMediaFS()->read($photo->getFileName()));
+                    }
+                }
+            }
             // generate PDF
+            $this->context['groups'][] = "Label";
+            $this->context['groups'][] = "Description";
+            $this->context['groups'][] = "Folder:Read";
+            $this->context['groups'][] = "Timestamp";
+            $this->context['groups'][] = "Blame";
+            $this->context['skip_null_values'] = false;
 
-            $data = $this->getNormalizer()->normalize($questionnaire);
+            $data = $this->getNormalizer()->normalize($questionnaire, null, $this->context);
 
-            $gotenbergURL=CCETools::param($this->getParameters(), 'CCE_GOTENBERGURL', 'http://localhost:3000');
-            $client   = new \TheCodingMachine\Gotenberg\Client($gotenbergURL,
-                                                               new \Http\Adapter\Guzzle6\Client());
+            // replace photo IRI with base64 image
+            $datajson = json_encode($data);
+            foreach ($photoLibs as $iri => $base64) {
+                $datajson = str_replace($iri, $base64, $datajson);
+            }
+            $data = json_decode($datajson, true);
+
+            $gotenbergURL = CCETools::param($this->getParameters(), 'CCE_GOTENBERGURL', 'http://localhost:3000');
+            $client       = new Client($gotenbergURL, new \Http\Adapter\Guzzle6\Client());
+            $kcuser       = $this->getKeycloakConnector()->getUser($this->getUserId());
+            $user         = new User();
+            $user->populateUser($kcuser);
+            $user = $this->getNormalizer()->normalize($user);
+
+            // render data with twig
+
             $htmlData = $this->getTwig()->render('questionnaire.html.twig',
-                                            [
-                                                'questionnaire' => $data,
-                                            ]);
+                                                 [
+                                                     'questionnaire' => $data,
+                                                     'user'          => $user,
+                                                     'locale'        => 'en'
+                                                 ]);
 
-            $html    = \TheCodingMachine\Gotenberg\DocumentFactory::makeFromString('qpdf.html', $htmlData);
-            $request = new \TheCodingMachine\Gotenberg\HTMLRequest($html);
-            $request->setMargins(\TheCodingMachine\Gotenberg\Request::NO_MARGINS);
+            $html    = DocumentFactory::makeFromString('qpdf.html', $htmlData);
+            $request = new HTMLRequest($html);
+            $request->setMargins(Request::NO_MARGINS);
 
             $pdfTempFile = $this->getKernel()->getLocalTmpDir() . '/QPDF-' . $questionnaire->getId() . '.pdf';
             $client->store($request, $pdfTempFile);
 
             // create an 'uploaded' PDF
-            $pdfFile = new UploadedFile($pdfTempFile, 'Q' . $questionnaire->getId() . '.pdf', 'appication/pdf',
+            $pdfFile = new UploadedFile($pdfTempFile, 'Q' . $questionnaire->getId() . '.pdf', 'application/pdf',
                                         filesize($pdfTempFile), true);
 
             // prepare new PDF
@@ -196,14 +206,14 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
 
             // set new PDF document, and remove old one
             $questionnaire->setPdf($pdf);
-            if ($oldPdf) {
+            if ($oldPdf && !empty($this->getEntityManager()->find(Media::class, $oldPdf->getId()))) {
                 $this->getEntityManager()->remove($oldPdf);
             }
             $this->getEntityManager()->persist($pdf);
             $this->getEntityManager()->flush();
 
             // force old PDF Document removal (hardDelete) by removing a second time
-            if ($oldPdf) {
+            if ($oldPdf && !empty($this->getEntityManager()->find(Media::class, $oldPdf->getId()))) {
                 $this->getEntityManager()->remove($oldPdf);
                 $this->getEntityManager()->persist($pdf);
                 $this->getEntityManager()->flush();
@@ -213,109 +223,35 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
     }
 
     /**
-     * Process scores for folder and sub entities
+     * @param $folder
      *
-     * @param \App\Entity\Folder $folder
-     *
-     * @return \App\Entity\Folder
+     * @return mixed
      */
-    private function processScore(Folder &$folder): Folder
+    private function owningPhotosUpdate(Folder $folder)
     {
-        $this->expressionEngine = new ExpressionLanguage();
-
-        foreach ($folder->getQuestionnaires() as &$questionnaire) {
-            foreach ($questionnaire->getBlocks() as &$block) {
-                foreach ($block->getQuestionAnswers() as &$answer) {
-                    foreach ($answer->getAnswerValues() as &$answerValue) {
-                        // calculate value with rawvalue and valueformula
-                        $this->processValueFormula($answerValue);
-                        if ($answer->getWeight() > 0) {
-                            $score  = $answer->getScore() ?? 0;
-                            $weight = $answer->getWeight() ?? 0;
-                            $points = (double)$answerValue->getValue() ?? 0;
-                            $score  = $score + ($points * $weight);
-                        } else {
-                            $answer->setScoreDivider(0);
-                            $score = null;
-                        }
-                        $answer->setScore($score);
-                    }
-                    $block->setScoreDivider($block->getScoreDivider() + $answer->getScoreDivider());
-                    $block->setScore($block->getScore() + $answer->getScore());
-                }
-                $questionnaire->setScoreDivider($questionnaire->getScoreDivider() + $block->getScoreDivider());
-                $questionnaire->setScore($questionnaire->getScore() + $block->getScore());
-            }
-            $folder->setScoreDivider($folder->getScoreDivider() + $questionnaire->getScoreDivider());
-            $folder->setScore($folder->getScore() + $questionnaire->getScore());
-        }
-        return $folder;
-    }
-
-    private function processValueFormula(AnswerValue &$answerValue)
-    {
-        if (empty($answerValue->getChoice())) {
-            return;
-        }
-        $expression = $answerValue->setValueFormula($answerValue->getChoice()->getValueFormula())->getValueFormula();
-        $expression = $expression['expression'] ?? '$value';
-
-        //do some replacement
-        $rawValue = $answerValue->getRawValue();
-        if (is_numeric($rawValue)) {
-            $rawValue = floatval($rawValue);
-        } else {
-            $rawValue = '"' . $rawValue . '"';
-        }
-
-        $position   = $answerValue->getChoice()->getPosition();
-        $expression = preg_replace('/\$\brank\b/i', $position, $expression);
-
-        $expression = preg_replace('/\$\bvalue\b/i', $rawValue, $expression);
-
-        $result = $this->expressionEngine->evaluate($expression);
-
-        $answerValue->setValue($result);
-
-    }
-
-    private function submit(&$folder)
-    {
-        // force group
-        $this->context['groups'][] = "State";
-        $folder->setState(stateableEntity::getStateSubmitted());
-
-    }
-
-    private function updateFolder(&$folder)
-    {
-        $this->expressionEngine = new ExpressionLanguage();
-        $em                     = $this->getEntityManager();
-        foreach ($folder->getQuestionnaires() as &$questionnaire) {
-            foreach ($questionnaire->getBlocks() as &$block) {
-                foreach ($block->getQuestionAnswers() as &$answer) {
-                    foreach ($answer->getAnswerValues() as &$answerValue) {
-                        if (!empty($answerValue->getChoice())) {
-                            $formula = $answerValue->getChoice()->getValueFormula() ?? [];
-                            $answerValue->setValueFormula($formula);
+        // create or update photo owning information
+        foreach ($folder->getQuestionnaires() as $questionnaire) {
+            foreach ($questionnaire->getBlocks() as $block) {
+                foreach ($block->getQuestions() as $question) {
+                    $owners = [
+                        $folder->getTarget(),
+                        $question->getId(),
+                        $block->getId(),
+                        $folder->getId(),
+                        $folder->getFolderTpl()->getId()
+                    ];
+                    foreach ($question->getAnswers() as $answer) {
+                        if (!empty($answer->getMedia())) {
+                            $this->addMediaOwner($answer->getMedia(), $owners);
+                            $answer->getMedia()->setTarget($folder->getTarget());
+                            $answer->getMedia()->setFolder($folder);
                         }
                     }
-                    foreach ($answer->getPhotos() as &$photo) {
-                        $owners = [
-                            $folder->getTarget(),
-                            $answer->getId(),
-                            $block->getId(),
-                            $folder->getId(),
-                            $folder->getTplFolder()->getId()
-                        ];
-                        foreach ($owners as $owner) {
-                            $mediaOwner = new MediaOwner();
-                            $mediaOwner->setMedia($photo);
-                            $mediaOwner->setOwner($owner);
-                            $repo = $em->getRepository(MediaOwner::class);
-                            if (!$repo->exists($mediaOwner)) {
-                                $em->persist($mediaOwner);
-                            }
+                    foreach ($question->getPhotos() as $photo) {
+                        $this->addMediaOwner($photo, $owners);
+                        if (!empty($folder->getTarget())) {
+                            $photo->setTarget($folder->getTarget());
+                            $photo->setFolder($folder);
                         }
                     }
                 }
@@ -325,7 +261,26 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
     }
 
     /**
-     * {@inheritdoc}
+     * @param $folder
+     */
+    private function submit(Folder &$folder)
+    {
+        // force group
+        $this->context['groups'][] = "State";
+        $folder->setState(stateableEntity::getStateSubmitted());
+        foreach ($folder->getQuestionnaires() as $questionnaire) {
+            foreach ($questionnaire->getTasks() as &$task) {
+                $task->setState(stateableEntity::getStateSubmitted());
+            }
+        }
+    }
+
+    /**
+     * @param array|object $data
+     * @param string       $to
+     * @param array        $context
+     *
+     * @return bool
      */
     public function supportsTransformation($data, string $to, array $context = []): bool
     {
@@ -338,7 +293,19 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
     }
 
     /**
-     * {@inheritdoc}
+     * @param object $data
+     * @param string $to
+     * @param array  $context
+     *
+     * @return \App\Entity\Folder\Folder|object
+     * @throws \League\Flysystem\FileNotFoundException
+     * @throws \Safe\Exceptions\FilesystemException
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     * @throws \TheCodingMachine\Gotenberg\ClientException
+     * @throws \TheCodingMachine\Gotenberg\RequestException
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
      */
     public function transform($data, string $to, array $context = [])
     {
@@ -357,20 +324,15 @@ final class FolderDataTransformer extends KeycloakDataProvider implements DataTr
 
             case 'update':
                 // it's folder update
-                // let's process folder and questionnaire score
                 // a folder can be updated if not in SUBMITTED state
-                if ($folder->getState() === stateableEntity::getStateDraft()) {
-                    $this->context['groups'][] = "Label";
-                    $this->context['groups'][] = "Description";
-                    $this->context['groups'][] = "Score";
-                    $this->processScore($folder);
-                    $this->updateFolder($folder);
-                } else {
+                if ($folder->getState() !== stateableEntity::getStateDraft()) {
                     throw new AccessDeniedHttpException();
                 }
                 break;
 
             case 'submit':
+                $folder->processScore();
+                $this->owningPhotosUpdate($folder);
                 $this->submit($folder);
                 $this->generatePDF($folder);
                 break;

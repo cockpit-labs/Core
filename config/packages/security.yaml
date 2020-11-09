@@ -27,6 +27,10 @@ security:
       pattern: ^/admin
       security: false
 
+    configs:
+      pattern: ^/api/config/
+      security: false
+
     api:
       pattern: ^/api/
       provider: jwt

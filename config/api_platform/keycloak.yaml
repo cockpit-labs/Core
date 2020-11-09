@@ -70,6 +70,25 @@ App\Entity\User:
       - 'Resource'
     preserve_empty_objects: true
 
+##################################
+App\Entity\Config:
+  attributes:
+    normalization_context:
+      groups:
+        - 'Config:Read'
+        - 'Resource'
+      preserve_empty_objects: true
+
+  collectionOperations:
+    get:
+      security: is_granted('ROLE_CCEAdmin')
+      security_message: 'Sorry, but you are not authorized.'
+
+  itemOperations:
+    get:
+      path: /config/{id}
+#      security: is_granted('ROLE_CCEAdmin')
+#      security_message: 'Sorry, but you are not authorized.'
 
 ##################################
 #App\Entity\Group:

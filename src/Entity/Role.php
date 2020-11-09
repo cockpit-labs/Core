@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -49,14 +50,14 @@ class Role
      * @ApiProperty(identifier=true)
      *
      * @var string | null
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      * @Groups({"Role:Read"})
      */
     public $id;
 
     /**
      * @var string
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      * @Groups({"Role:Read"})
      *
      */
@@ -65,21 +66,32 @@ class Role
     /**
      * @var string
      *
-     * @Groups({"TplFolder:Read"})
-     * @Groups({"TplFolderTarget:Read"})
+     * @Groups({"FolderTpl:Read"})
+     * @Groups({"FolderTplTarget:Read"})
      */
     public $uuid;
 
+    /**
+     * @return string|null
+     */
     private function getSymfonyName(): ?string
     {
         return $this->name;
     }
 
+    /**
+     * @return string|null
+     */
     public function getId(): ?string
     {
         return $this->id;
     }
 
+    /**
+     * @param string|null $id
+     *
+     * @return $this
+     */
     public function setId(?string $id): self
     {
         $this->id = $id;
@@ -87,11 +99,19 @@ class Role
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getName(): ?string
     {
         return KeycloakConnector::toKeycloakRole($this->name ?? $this->id);
     }
 
+    /**
+     * @param string|null $name
+     *
+     * @return $this
+     */
     public function setName(?string $name): self
     {
         $this->name = KeycloakConnector::toSymfonyRole($name);
@@ -99,11 +119,19 @@ class Role
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getUuid(): ?string
     {
         return $this->uuid;
     }
 
+    /**
+     * @param string|null $uuid
+     *
+     * @return $this
+     */
     public function setUuid(?string $uuid): self
     {
         $this->uuid = $uuid;

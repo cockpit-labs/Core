@@ -1,7 +1,7 @@
 easy_admin:
   entities:
     TemplateQuestionnaire:
-      class: App\Entity\TplQuestionnaire
+      class: App\Entity\Questionnaire\TplQuestionnaire
       label: Questionnaires
       list:
         fields:

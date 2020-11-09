@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -26,8 +27,8 @@
 namespace App\Tests\API;
 
 use App\Entity\Calendar;
-use App\Entity\TplFolderPermission;
-use App\Entity\TplFolder;
+use App\Entity\Folder\FolderTpl;
+use App\Entity\Folder\FolderTplPermission;
 use CronExpressionGenerator\FakerProvider;
 use Faker\Factory;
 
@@ -69,7 +70,7 @@ class APITplFoldersTest extends ApiTest
             $this->doDeleteRequest(Calendar::class, $id);
         }
         foreach ($this->tplFolderList as $id) {
-            $this->doDeleteRequest(TplFolder::class, $id);
+            $this->doDeleteRequest(FolderTpl::class, $id);
         }
         parent::tearDown();
     }
@@ -79,7 +80,7 @@ class APITplFoldersTest extends ApiTest
      */
     public function testCommon()
     {
-        $this->commonTest(TplFolder::class);
+        $this->commonTest(FolderTpl::class);
     }
 
     /**
@@ -107,9 +108,9 @@ class APITplFoldersTest extends ApiTest
         ];
 
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doPostRequest(TplFolder::class, $data);
+        $response = $this->doPostRequest(FolderTpl::class, $data);
         $this->assertResponseStatusCodeSame(201);
-        $this->assertMatchesResourceCollectionJsonSchema(TplFolder::class);
+        $this->assertMatchesResourceCollectionJsonSchema(FolderTpl::class);
         unset($data['calendars']);
         $this->assertJsonContains($data);
         $data                  = json_decode($response->getContent(), true);
@@ -119,9 +120,9 @@ class APITplFoldersTest extends ApiTest
 
     public function testTplFolders()
     {
-        $response = $this->doGetRequest(TplFolder::class);
+        $response = $this->doGetRequest(FolderTpl::class);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplFolder::class);
+        $this->assertMatchesResourceCollectionJsonSchema(FolderTpl::class);
         $this->assertNotEmpty(json_decode($response->getContent()));
         foreach (json_decode($response->getContent(), true) as $result) {
             $this->assertNotEmpty($result);
@@ -141,47 +142,47 @@ class APITplFoldersTest extends ApiTest
         ];
 
         $this->setAdminClient()->setAdminUser();
-        $response = $this->doGetRequest(TplFolder::class);
-        $id       = $this->getAnId(TplFolder::class);
-        $response = $this->doPatchRequest(TplFolder::class, $id, $data);
+        $response = $this->doGetRequest(FolderTpl::class);
+        $id       = $this->getAnId(FolderTpl::class);
+        $response = $this->doPatchRequest(FolderTpl::class, $id, $data);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplFolder::class);
+        $this->assertMatchesResourceCollectionJsonSchema(FolderTpl::class);
         $this->assertJsonContains($data);
 
         $data     = [
             "label"       => $label,
             "description" => $description,
         ];
-        $response = $this->doPatchRequest(TplFolder::class, $id, $data);
+        $response = $this->doPatchRequest(FolderTpl::class, $id, $data);
         $this->assertResponseStatusCodeSame(200);
-        $this->assertMatchesResourceCollectionJsonSchema(TplFolder::class);
+        $this->assertMatchesResourceCollectionJsonSchema(FolderTpl::class);
         $this->assertJsonContains($data);
 
         // create a permission
         $dataPermission = [
             'role'      => 'CCEUser',
-            'right'     => TplFolderPermission::RIGHT_ANNOTATE,
-            'tplFolder' => $this->getIri(TplFolder::class, $id),
+            'right'     => FolderTplPermission::RIGHT_ANNOTATE,
+            'folderTpl' => $this->getIri(FolderTpl::class, $id),
         ];
 
-        $response = $this->doPostRequest(TplFolderPermission::class, $dataPermission);
+        $response = $this->doPostRequest(FolderTplPermission::class, $dataPermission);
         $this->assertResponseStatusCodeSame(201);
-        $this->assertMatchesResourceCollectionJsonSchema(TplFolderPermission::class);
+        $this->assertMatchesResourceCollectionJsonSchema(FolderTplPermission::class);
         $this->assertJsonContains($dataPermission);
 
         // get tplfolder
-        $response = $this->doGetRequest(TplFolder::class, $id);
+        $response = $this->doGetRequest(FolderTpl::class, $id);
 
         // modify permissions
         // only last created now
         $data                = [];
-        unset($dataPermission['tplFolder']);
+        unset($dataPermission['folderTpl']);
         $data['permissions'] = [$dataPermission];
-        $response            = $this->doPatchRequest(TplFolder::class, $id, $data);
+        $response            = $this->doPatchRequest(FolderTpl::class, $id, $data);
         $data                 = json_decode($response->getContent(), true);
         unset($data['permissions'][0]['resource']);
         unset($data['permissions'][0]['id']);
-        unset($data['permissions'][0]['tplFolder']);
+        unset($data['permissions'][0]['folderTpl']);
         $this->assertEquals([$dataPermission], $data['permissions']);
     }
 }

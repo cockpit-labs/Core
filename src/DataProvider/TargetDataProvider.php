@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -29,6 +30,8 @@ use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
 use ApiPlatform\Core\DataProvider\ItemDataProviderInterface;
 use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use App\CentralAdmin\KeycloakConnector;
+use App\Entity\Folder\FolderTplPermission;
+use App\Entity\Folder\FolderTplTarget;
 use App\Entity\Target;
 use Generator;
 use Ramsey\Uuid\Uuid;
@@ -36,7 +39,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class TargetDataProvider
  */
-final class TargetDataProvider extends KeycloakDataProvider implements CollectionDataProviderInterface, ItemDataProviderInterface, RestrictedDataProviderInterface
+final class TargetDataProvider extends CommonDataProvider implements CollectionDataProviderInterface, ItemDataProviderInterface, RestrictedDataProviderInterface
 {
 
     public function addParentTarget($groups, &$targets, $target)
@@ -78,13 +81,11 @@ final class TargetDataProvider extends KeycloakDataProvider implements Collectio
         $queryBuilder = $this->getEntityManager()->createQueryBuilder();
 
         $queryBuilder->select('t.role')
-                     ->from('App:TplFolderPermission', 'p');
+                     ->from(FolderTplPermission::class, 'p');
 
-        $queryBuilder->join("App:TplFolderTarget", "t");
-        $queryBuilder->andWhere("p.tplFolder=t.tplFolder");
+        $queryBuilder->join(FolderTplTarget::class, "t");
+        $queryBuilder->andWhere("p.folderTpl=t.folderTpl");
         $queryBuilder->andWhere(sprintf("p.right='%s'", $right));
-//        $queryBuilder->andWhere('p.right IN (:rights)')
-//                     ->setParameter('rights', $rights);
 
         $query       = $queryBuilder->getQuery();
         $targetRoles = array_map(function ($item) {

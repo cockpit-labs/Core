@@ -13,7 +13,8 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies
+ * or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -28,8 +29,10 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use App\Entity\Folder\Folder;
+use App\Entity\Folder\FolderTpl;
 use App\Traits\descriptionableEntity;
-use App\Traits\gedmoableEntity;
+use App\Traits\traceableEntity;
 use App\Traits\labelableEntity;
 use App\Traits\resourceableEntity;
 use Cron;
@@ -56,7 +59,7 @@ class Calendar
     /**
      * add group (Timestamp and Blame) for TimestampableEntity and BlameableEntity
      */
-    use GedmoableEntity;
+    use traceableEntity;
 
     /**
      * Hook timestampable behavior
@@ -95,14 +98,14 @@ class Calendar
      * @ORM\GeneratedValue(strategy="UUID")
      * @Groups({"Calendar:Read"})
      * @Groups({"Calendar:Update"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      */
     public $id;
 
     /**
      * @var \DateTime|null
      * @Groups({"Calendar:Read"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      *
      */
     public $periodStart;
@@ -110,7 +113,7 @@ class Calendar
     /**
      * @var \DateTime|null
      * @Groups({"Calendar:Read"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      *
      */
     public $periodEnd;
@@ -121,7 +124,7 @@ class Calendar
      * @ORM\Column(name="start", type="datetime", nullable=true)
      * @Groups({"Calendar:Read"})
      * @Groups({"Calendar:Update"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      */
     private $start;
 
@@ -131,7 +134,7 @@ class Calendar
      * @ORM\Column(name="end", type="datetime", nullable=true)
      * @Groups({"Calendar:Read"})
      * @Groups({"Calendar:Update"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      */
     private $end;
 
@@ -141,7 +144,7 @@ class Calendar
      * @ORM\Column(name="cronstart", type="string", length=100, nullable=true)
      * @Groups({"Calendar:Read"})
      * @Groups({"Calendar:Update"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      */
     private $cronStart;
 
@@ -151,7 +154,7 @@ class Calendar
      * @ORM\Column(name="cronend", type="string", length=100, nullable=true)
      * @Groups({"Calendar:Read"})
      * @Groups({"Calendar:Update"})
-     * @Groups({"TplFolder:Read"})
+     * @Groups({"FolderTpl:Read"})
      */
     private $cronEnd;
 
@@ -175,32 +178,64 @@ class Calendar
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\ManyToMany(targetEntity="TplFolder", mappedBy="calendars")
+     * @ORM\ManyToMany(targetEntity="\App\Entity\Folder\FolderTpl", mappedBy="calendars")
      * @Groups({"Calendar:Read"})
      * @ApiProperty(readableLink=false, readable=true)
      */
-    private $tplFolders;
+    private $folderTpls;
 
-    public function __construct()
-    {
-        $this->tplFolders = new ArrayCollection();
-    }
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     *
+     * @ORM\ManyToMany(targetEntity="\App\Entity\Folder\Folder", mappedBy="calendars")
+     * @Groups({"Calendar:Read"})
+     * @ApiProperty(readableLink=false, readable=true)
+     */
+    private $folders;
 
-    public function addTplFolder(TplFolder $tplFolder): self
+    /**
+     * @param \App\Entity\Folder\Folder $folder
+     *
+     * @return $this
+     */
+    public function addFolder(Folder $folder): self
     {
-        if (!$this->tplFolders->contains($tplFolder)) {
-            $this->tplFolders->add($tplFolder);
-            $tplFolder->addCalendar($this);
+        if (!$this->getFolders()->contains($folder)) {
+            $this->getFolders()->add($folder);
+            $folder->addCalendar($this);
         }
 
         return $this;
     }
 
+    /**
+     * @param \App\Entity\Folder\FolderTpl $folderTpl
+     *
+     * @return $this
+     */
+    public function addFolderTpl(FolderTpl $folderTpl): self
+    {
+        if (!$this->getFolderTpls()->contains($folderTpl)) {
+            $this->getFolderTpls()->add($folderTpl);
+            $folderTpl->addCalendar($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
     public function getCronEnd(): ?string
     {
         return $this->cronEnd;
     }
 
+    /**
+     * @param string|null $cronEnd
+     *
+     * @return $this
+     */
     public function setCronEnd(?string $cronEnd): self
     {
         $this->cronEnd = $cronEnd;
@@ -208,11 +243,19 @@ class Calendar
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getCronStart(): ?string
     {
         return $this->cronStart;
     }
 
+    /**
+     * @param string|null $cronStart
+     *
+     * @return $this
+     */
     public function setCronStart(?string $cronStart): self
     {
         $this->cronStart = $cronStart;
@@ -220,11 +263,19 @@ class Calendar
         return $this;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getEnd(): ?DateTimeInterface
     {
         return $this->end;
     }
 
+    /**
+     * @param \DateTimeInterface|null $end
+     *
+     * @return $this
+     */
     public function setEnd(?DateTimeInterface $end): self
     {
         $this->end = $end->modify("next day midnight");
@@ -232,6 +283,26 @@ class Calendar
         return $this;
     }
 
+    /**
+     * @return Collection|FolderTpl[]
+     */
+    public function getFolderTpls(): Collection
+    {
+        $this->folderTpls = $this->folderTpls ?? new ArrayCollection();
+        return $this->folderTpls;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFolders(): Collection
+    {
+        return $this->folders;
+    }
+
+    /**
+     * @return string|null
+     */
     public function getId(): ?string
     {
         return $this->id;
@@ -252,7 +323,7 @@ class Calendar
     {
         $this->periodEnd = $this->getEnd();
         if ($this->getCronEnd() !== null && Cron\CronExpression::isValidExpression($this->getCronEnd())) {
-            $cron            = Cron\CronExpression::factory($this->getCronEnd());
+            $cron = Cron\CronExpression::factory($this->getCronEnd());
             $this->setPeriodEnd($cron->getNextRunDate());
         }
 
@@ -261,6 +332,8 @@ class Calendar
 
     /**
      * @param \DateTime|null $periodEnd
+     *
+     * @return $this
      */
     public function setPeriodEnd(?DateTime $periodEnd): self
     {
@@ -275,7 +348,7 @@ class Calendar
     {
         $this->periodStart = $this->getStart();
         if ($this->getCronStart() !== null && Cron\CronExpression::isValidExpression($this->getCronStart())) {
-            $cron              = Cron\CronExpression::factory($this->getCronStart());
+            $cron = Cron\CronExpression::factory($this->getCronStart());
             $this->setPeriodStart($cron->getNextRunDate());
         }
 
@@ -284,6 +357,8 @@ class Calendar
 
     /**
      * @param \DateTime|null $periodStart
+     *
+     * @return $this
      */
     public function setPeriodStart(?DateTime $periodStart): self
     {
@@ -321,11 +396,19 @@ class Calendar
         $this->periods = $periods;
     }
 
+    /**
+     * @return \DateTimeInterface|null
+     */
     public function getStart(): ?DateTimeInterface
     {
         return $this->start;
     }
 
+    /**
+     * @param \DateTimeInterface|null $start
+     *
+     * @return $this
+     */
     public function setStart(?DateTimeInterface $start): self
     {
         $this->start = $start->modify("midnight");
@@ -334,18 +417,18 @@ class Calendar
     }
 
     /**
-     * @return Collection|TplFolder[]
+     * @return bool|null
      */
-    public function getTplFolders(): Collection
-    {
-        return $this->tplFolders;
-    }
-
     public function getValid(): ?bool
     {
         return $this->valid;
     }
 
+    /**
+     * @param bool $valid
+     *
+     * @return $this
+     */
     public function setValid(bool $valid): self
     {
         $this->valid = $valid;
@@ -353,11 +436,31 @@ class Calendar
         return $this;
     }
 
-    public function removeTplFolder(TplFolder $tplFolder): self
+    /**
+     * @param $folder
+     *
+     * @return $this
+     */
+    public function removeFolder($folder): self
     {
-        if ($this->tplFolders->contains($tplFolder)) {
-            $this->tplFolders->removeElement($tplFolder);
-            $tplFolder->removeCalendar($this);
+        if ($this->getFolders()->contains($folder)) {
+            $this->getFolders()->removeElement($folder);
+            $folder->removeCalendar($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $folderTpl
+     *
+     * @return $this
+     */
+    public function removeFolderTpl($folderTpl): self
+    {
+        if ($this->getFolderTpls()->contains($folderTpl)) {
+            $this->getFolderTpls()->removeElement($folderTpl);
+            $folderTpl->removeCalendar($this);
         }
 
         return $this;
